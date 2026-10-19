@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2026 세제개편안 트래커</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f3f5f6;--card:#fff;--ink:#16222e;--sub:#5b6875;--line:#d9e0e5;--warn:#9a4a00;--warnbg:#fff1dc;--warnline:#e8a74a;--ok:#12703a;--okbg:#e2f3e8;--bad:#a52a2a;--acc:#0f5f73;--accbg:#e4f1f4}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11171c;--card:#1a232b;--ink:#e8eef2;--sub:#97a5b1;--line:#2c3945;--warn:#f2b866;--warnbg:#3a2a12;--warnline:#b97a1f;--ok:#58c58a;--okbg:#14301f;--bad:#f08a8a;--acc:#6cc3d8;--accbg:#173540}}
+:root[data-theme="dark"]{--bg:#11171c;--card:#1a232b;--ink:#e8eef2;--sub:#97a5b1;--line:#2c3945;--warn:#f2b866;--warnbg:#3a2a12;--warnline:#b97a1f;--ok:#58c58a;--okbg:#14301f;--bad:#f08a8a;--acc:#6cc3d8;--accbg:#173540}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--warnbg);z-index:10}
+.banner{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--warnbg);color:var(--warn);border-bottom:2px solid var(--warnline);padding:10px 16px;font-weight:600;font-size:14px;text-align:center}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:26px;line-height:1.3;font-weight:800;margin:8px 0 6px;letter-spacing:-.02em}
+.lead{color:var(--sub);margin:0 0 18px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.sum>div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.sum small{display:block;color:var(--sub);font-size:12.5px;line-height:1.4}
+.sum b{font-size:19px;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.sum{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:22px}
+.panel h2{font-size:17px;margin:0 0 4px}
+.panel>p{margin:0 0 12px;color:var(--sub);font-size:13.5px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 14px;overflow-x:auto}
+.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;color:var(--sub);white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--acc);border-bottom-color:var(--acc)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fld label,.lbl{font-size:13.5px;font-weight:600}
+.hint{font-size:12.5px;color:var(--sub);margin:0 0 10px}
+input[type=number],select{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:0 0 10px;cursor:pointer}
+.chk input{width:18px;height:18px;margin:3px 0 0;flex:none;accent-color:var(--acc)}
+.dep{border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px}
+.dep .row{display:grid;grid-template-columns:1.3fr .7fr 1.2fr 1fr;gap:8px;margin-bottom:8px}
+.dep .row label{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--sub)}
+@media (max-width:560px){.dep .row{grid-template-columns:1fr 1fr}}
+.dep .foot{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.dep .foot .chk{margin:0}
+.dep .del{margin-left:auto}
+button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:8px 12px;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.mr{font-size:13.5px;color:var(--acc);margin:2px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--warnline);border-radius:8px;padding:18px 16px;margin:0 0 20px}
+.card.done{border-left-color:var(--ok)}
+.top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.tax{font-size:13px;font-weight:600;color:var(--acc);background:var(--accbg);padding:2px 10px;border-radius:99px}
+.pill{font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;border:1px solid var(--warnline);color:var(--warn);background:var(--warnbg)}
+.pill.ok{border-color:var(--ok);color:var(--ok);background:var(--okbg)}
+h3.t{font-size:19px;line-height:1.4;margin:6px 0 4px;font-weight:700}
+.st{font-size:13.5px;color:var(--sub);margin:0 0 12px}
+.cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media (max-width:640px){.cmp{grid-template-columns:1fr}}
+.cmp>div{border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px}
+.cmp h4{margin:0 0 4px;font-size:13px;color:var(--sub);font-weight:600}
+.cmp p{margin:0}
+.cmp .g{border-color:var(--warnline);background:var(--warnbg)}
+.cmp .f{border-style:dashed;color:var(--sub)}
+.cmp .f.on{border-style:solid;border-color:var(--ok);background:var(--okbg);color:var(--ink)}
+.why{margin:0 0 4px}.why b{color:var(--acc)}
+.meta{margin:0 0 14px;font-size:13px;color:var(--sub)}
+.sim{border-top:1px dashed var(--line);padding-top:14px}
+.res{background:var(--bg);border-radius:6px;padding:12px}
+.tag{font-size:12.5px;font-weight:600;color:var(--warn);margin-bottom:8px}
+.res.fin .tag{color:var(--ok)}
+.det{margin:0 0 10px;padding:0;list-style:none;font-size:13.5px}
+.det li{padding:6px 0;border-bottom:1px solid var(--line)}
+.det li:last-child{border-bottom:none}
+.det b{font-weight:600}
+.y{color:var(--ok);font-weight:600}.n{color:var(--bad);font-weight:600}
+dl{margin:0 0 8px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+dt{color:var(--sub)}dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.main{display:flex;justify-content:space-between;gap:12px;align-items:baseline;border-top:1px solid var(--line);padding-top:8px}
+.main span{font-weight:600;font-size:14px}
+.main strong{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+.good{color:var(--ok)}.bad{color:var(--bad)}.flat{color:var(--sub)}
+.note{margin:8px 0 0;font-size:12.5px;color:var(--sub)}
+.need{color:var(--sub);font-size:14px;margin:0}
+.need a{color:var(--acc)}
+footer{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);padding-top:14px}
+footer p{margin:0 0 6px}
+</style>
+</head>
+<body>
+<div class="banner" id="banner"></div>
+<main>
+<h1>2026 세제개편안 트래커</h1>
+<p class="lead">정부안이 본회의를 통과했는지, 정부안과 비교해 어떻게 바뀌었는지, 그리고 내 세금이 얼마나 달라지는지 한 화면에서 확인해요.</p>
+<div class="sum">
+<div><small>본회의 통과</small><b id="s1"></b></div>
+<div><small>정부안에서 수정된 항목</small><b id="s2"></b></div>
+<div><small>내 세액 효과 합계 (원천징수 선납분 제외)</small><b id="s3">입력 전</b></div>
+</div>
+
+<section class="panel" id="me">
+<h2>내 정보 입력</h2>
+<p>탭별로 입력한 값이 아래 모든 항목의 요건 판정과 계산에 쓰여요. 입력값은 이 화면 안에서만 계산되고 저장되지 않아요.</p>
+<div class="tabs" role="tablist">
+<button type="button" role="tab" aria-selected="true" aria-controls="t0" id="b0">소득</button>
+<button type="button" role="tab" aria-selected="false" aria-controls="t1" id="b1">부양가족</button>
+<button type="button" role="tab" aria-selected="false" aria-controls="t2" id="b2">월세 요건</button>
+<button type="button" role="tab" aria-selected="false" aria-controls="t3" id="b3">사업자 요건</button>
+</div>
+
+<div role="tabpanel" id="t0" aria-labelledby="b0">
+<div class="grid">
+<div class="fld"><label for="ptype">소득 유형</label><select id="ptype"><option value="wage">근로소득자 (총급여 기준)</option><option value="biz">사업자 (종합소득금액 기준)</option></select></div>
+<div class="fld"><label for="pinc" id="pincl">연 총급여 (만원)</label><input id="pinc" type="number" inputmode="numeric" min="0" placeholder="예: 6000"></div>
+<div class="fld"><label for="ptb">종합소득 과세표준 (만원)</label><input id="ptb" type="number" inputmode="numeric" min="0" placeholder="예: 4500"><p class="mr" id="mr"></p></div>
+</div>
+</div>
+
+<div role="tabpanel" id="t1" aria-labelledby="b1" hidden>
+<p class="hint">배우자는 나이·동거 요건이 없고, 직계비속은 따로 살아도 돼요. 직계존속은 주거 형편상 따로 살면서 실제로 부양하면 생계를 같이하는 것으로 봐요. 장애인은 나이 요건이 없지만 소득요건은 적용돼요.</p>
+<div id="deps"></div>
+<div class="btns"><button type="button" id="addDep">부양가족 추가</button></div>
+</div>
+
+<div role="tabpanel" id="t2" aria-labelledby="b2" hidden>
+<div class="fld"><label for="rhh">세대 요건</label><select id="rhh">
+<option value="head">무주택 세대의 세대주</option>
+<option value="member">무주택 세대의 세대원 (세대주가 주택 관련 공제를 받지 않음)</option>
+<option value="no">해당 없음 (세대 구성원이 주택 보유 등)</option></select></div>
+<label class="chk"><input type="checkbox" id="rhouse">임차 주택이 국민주택규모(전용 85㎡) 이하이거나 기준시가 4억원 이하예요 (오피스텔·고시원 포함)</label>
+<label class="chk"><input type="checkbox" id="rmove">임대차계약서 주소지로 주민등록 전입신고를 했어요</label>
+<label class="chk"><input type="checkbox" id="rsin">성실사업자 또는 성실신고확인대상자예요 <span class="hint">(사업자만 해당)</span></label>
+</div>
+
+<div role="tabpanel" id="t3" aria-labelledby="b3" hidden>
+<div class="grid">
+<div class="fld"><label for="bform">사업자 형태</label><select id="bform"><option value="ind">개인사업자</option><option value="corp">법인사업자</option></select></div>
+<div class="fld"><label for="bprev">직전연도 공급가액 합계 (만원)</label><input id="bprev" type="number" inputmode="numeric" min="0" placeholder="예: 30000"></div>
+</div>
+<label class="chk"><input type="checkbox" id="bind">영수증 발급 대상 업종이에요 (소매업, 음식점업, 숙박업 등 주로 소비자를 상대하는 업종)</label>
+<p class="hint">신용카드 매출 세액공제는 직전연도 공급가액 10억원 이하 개인사업자만 받을 수 있어요. 사업자 형태는 의제매입세액공제 공제율에도 쓰여요.</p>
+</div>
+
+<div class="btns"><button type="button" id="demo">예시 값 채우기</button></div>
+</section>
+
+<div id="cards"></div>
+<footer>
+<p>출처: 재정경제부 「2026년 세제개편안」(2026.8.3), 농림축산식품부 보도자료(8.9), 머니투데이방송(8.3), 데일리팜(8.4), KB Think(8.24). 정부안 확정(9.1) 이후 국회 본회의 의결은 12월 예정으로 알려져 있어요.</p>
+<p>상태 확인일 2026.10.19. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
+<p>계산 결과는 정부안과 입력값에 따른 참고용 추정치이며 세무 자문이 아니에요. 부양가족 중복공제, 의제매입세액 공제한도, 신용카드 공제의 납부세액 한도, 증빙 요건은 반영하지 않았어요.</p>
+</footer>
+</main>
+<script>
+var W=10000;
+var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
+var $=function(id){return document.getElementById(id)};
+var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
+function mr(tb){var b=[[1400,6],[5000,15],[8800,24],[15000,35],[30000,38],[50000,40],[100000,42],[1e12,45]];for(var i=0;i<b.length;i++)if(+tb<=b[i][0])return b[i][1]}
+function rentRate(P){var a=+P.inc;return P.type=="wage"?(a<=5500?.17:a<=8000?.15:0):(a<=4500?.17:a<=7000?.15:0)}
+
+/* 요건 판정 */
+function depOK(d,lim){var w=[];
+ if(d.rel!="spouse"&&!d.dis){if(d.age===""){w.push("나이 미입력")}else{var a=+d.age,ok=d.rel=="asc"?a>=60:d.rel=="desc"?a<=20:(a<=20||a>=60);if(!ok)w.push("나이요건")}}
+ if((d.rel=="asc"||d.rel=="sib")&&!d.live)w.push("생계요건");
+ if(+d.amt>lim[d.kind])w.push("소득요건");
+ return{ok:!w.length,w:w}}
+function rentOK(P){var w=[];
+ if(P.r.hh=="no")w.push("무주택 세대 요건");
+ if(!P.r.house)w.push("주택 규모·가격 요건");
+ if(!P.r.move)w.push("전입신고 요건");
+ if(P.type=="biz"&&!P.r.sin)w.push("성실사업자 요건");
+ if(!rentRate(P))w.push("소득요건");
+ return{ok:!w.length,w:w}}
+function cardOK(P){var w=[];
+ if(P.b.form=="corp")w.push("법인사업자는 제외");
+ if(!P.b.ind)w.push("대상 업종 아님");
+ if(+P.b.prev>100000)w.push("직전연도 공급가액 10억원 초과");
+ return{ok:!w.length,w:w}}
+function verdict(r){return r.ok?'<span class="y">공제</span>':'<span class="n">제외</span> ('+r.w.join(", ")+')'}
+function go(t){return ' <a href="#me" data-tab="'+t+'">입력하기</a>'}
+
+/* passed / fin 을 채우면 확정안 기준으로 바뀝니다. fin={text, changed, diff, p:{...}} */
+var ITEMS=[
+{tax:"종합소득세",title:"기본공제 소득요건 완화",passed:false,fin:null,
+cur:"배우자·부양가족의 소득금액 100만원 이하 (근로소득만 있으면 총급여 500만원 이하)",
+gov:"소득금액 300만원 이하 (근로소득만 있으면 총급여 750만원 이하). 1인당 150만원 공제는 유지",
+pc:{lim:{inc:100,pay:500}},pg:{lim:{inc:300,pay:750}},
+why:"맞벌이·다자녀 가구의 공제 적용 폭을 넓혀 세 부담을 낮추려는 취지예요.",when:"2027.1.1 적용 예정(발표 기준)",f:[],
+need:function(P){return !P.deps.length?"부양가족을 추가해 주세요."+go(1):P.tb===""?"종합소득 과세표준을 입력해 주세요."+go(0):""},
+amt:function(P,i,p){var n=0;P.deps.forEach(function(d){if(depOK(d,p.lim).ok)n++});var v=n*150*W*mr(P.tb)/100*1.1;return{v:v,t:n+"명 공제"}},
+detail:function(P,it,f){return P.deps.map(function(d,k){return '<li><b>'+(k+1)+'. '+REL[d.rel]+(d.rel!="spouse"&&d.age!==""?" "+d.age+"세":"")+(d.dis?" · 장애인":"")+'</b><br>현행 '+verdict(depOK(d,it.pc.lim))+' → 정부안 '+verdict(depOK(d,it.pg.lim))+(f?' → 확정안 '+verdict(depOK(d,f.p.lim)):'')+'</li>'}).join("")},
+ml:"소득세·지방소득세 감소",note:"공제 인원 × 150만원 × 한계세율 × 1.1(지방소득세)로 계산했어요."},
+{tax:"종합소득세",title:"월세세액공제 대상 월세액 확대",passed:false,fin:null,
+cur:"연 월세액 1,000만원 한도, 공제율 15% (소득이 낮으면 17%)",
+gov:"연 월세액 1,200만원 한도로 확대. 공제율은 동일",
+pc:{cap:1000},pg:{cap:1200},
+why:"주거비 부담을 덜어주려는 취지예요.",when:"2027.1.1 적용 예정(발표 기준)",
+f:[{k:"rent",l:"연 월세 지급액 (만원)",ph:"예: 1200"}],
+need:function(P,i){return i.rent===""?"연 월세 지급액을 입력해 주세요.":P.inc===""?"소득을 입력해 주세요."+go(0):""},
+amt:function(P,i,p){if(!rentOK(P).ok)return{v:0,t:"대상 아님"};var v=Math.min(+i.rent,p.cap)*W*rentRate(P);return{v:v,t:fmt(v)}},
+detail:function(P){var r=rentOK(P);return '<li>'+(r.ok?'<span class="y">요건 충족</span> · 공제율 '+Math.round(rentRate(P)*100)+'%':'<span class="n">공제 대상 아님</span>: '+r.w.join(", ")+go(2))+'</li>'},
+ml:"세액공제 증가",note:"근로자는 총급여 8,000만원, 사업자는 종합소득금액 7,000만원 이하가 대상이고, 5,500만원(사업자 4,500만원) 이하는 17%예요."},
+{tax:"종합소득세",title:"인적용역 사업소득 원천징수세율 인하",passed:false,fin:null,
+cur:"원천징수세율 3% (지방소득세 포함 3.3%)",gov:"원천징수세율 2% (지방소득세 포함 2.2%)",
+pc:{r:.033},pg:{r:.022},
+why:"배달라이더 등 영세 인적용역 사업자의 원천징수 부담을 덜기 위한 조치예요.",when:"시행령 시행일 이후 지급분부터 적용 예상(미확정)",
+f:[{k:"fr",l:"연 인적용역 수입금액 (만원)",ph:"예: 3000"}],
+need:function(P,i){return i.fr===""?"연 수입금액을 입력해 주세요.":""},
+amt:function(P,i,p){var a=+i.fr*W*p.r;return{v:-a,t:fmt(a)}},
+ml:"미리 내는 세금 감소",cash:true,note:"최종 세액이 줄어드는 것이 아니에요. 5월 종합소득세 신고 때 정산되는 선납분이 줄어드는 효과예요."},
+{tax:"부가가치세",title:"음식점업 의제매입세액공제 우대 공제율 기한 연장",passed:false,fin:null,
+cur:"연 매출 4억원 이하 개인 음식점 9/109 우대 공제율을 2026.12.31까지 적용 (연장이 없으면 이후 8/108)",
+gov:"우대 공제율 9/109 적용 기한을 2028.12.31까지 2년 연장",
+pc:{pref:false},pg:{pref:true},
+why:"원자재 가격·인건비·공공요금 상승으로 어려운 영세 자영업자의 부담을 덜고 외식물가를 안정시키려는 취지예요.",when:"기한 연장 (2028.12.31까지)",
+f:[{k:"sales",l:"연 매출액 (만원)",ph:"예: 30000"},{k:"buy",l:"연 면세 농축수산물 매입액 (만원)",ph:"예: 8000"}],
+need:function(P,i){return i.sales===""||i.buy===""?"연 매출액과 매입액을 입력해 주세요.":""},
+amt:function(P,i,p){var r,l;if(P.b.form=="corp"){r=6/106;l="6/106"}else if(p.pref&&+i.sales<=40000){r=9/109;l="9/109"}else{r=8/108;l="8/108"}var v=+i.buy*W*r;return{v:v,t:fmt(v)+" ("+l+")"}},
+detail:function(P,it,f,i){return '<li>'+(P.b.form=="corp"?'<span class="n">우대 대상 아님</span>: 법인 음식점은 6/106 고정'+go(3):+i.sales>40000?'<span class="n">우대 대상 아님</span>: 연 매출 4억원 초과':'<span class="y">우대 대상</span> · 개인 음식점, 연 매출 4억원 이하')+'</li>'},
+ml:"연장으로 유지되는 공제액",note:"비교 기준은 연장이 없을 때의 2027년 이후 규정이에요. 사업자 형태는 사업자 요건 탭 값을 써요."},
+{tax:"부가가치세",title:"신용카드 매출 세액공제 축소",passed:false,fin:null,
+cur:"공제율 1.3%, 연간 한도 1,000만원 (한시 우대, 2026.12.31 일몰 예정)",
+gov:"공제율 1.2%, 연간 한도 500만원. 2027.1.1 이후 카드매출분부터 적용",
+pc:{r:.013,cap:1000},pg:{r:.012,cap:500},
+why:"세수 증가 요인으로 분류된 항목이에요. 정부가 밝힌 구체적 취지는 아직 확인하지 못했어요.",when:"2027.1.1 이후 신용카드 매출분",
+f:[{k:"pay",l:"연 신용카드 등 결제금액 (만원)",ph:"예: 30000"}],
+need:function(P,i){return i.pay===""?"연 결제금액을 입력해 주세요.":P.b.prev===""?"직전연도 공급가액을 입력해 주세요."+go(3):""},
+amt:function(P,i,p){if(!cardOK(P).ok)return{v:0,t:"대상 아님"};var v=Math.min(+i.pay*W*p.r,p.cap*W);return{v:v,t:fmt(v)}},
+detail:function(P){var r=cardOK(P);return '<li>'+(r.ok?'<span class="y">요건 충족</span> · 개인사업자, 대상 업종, 직전연도 공급가액 10억원 이하':'<span class="n">공제 대상 아님</span>: '+r.w.join(", ")+go(3))+'</li>'},
+ml:"세액공제 변화",note:"현행 1.3%는 2026.12.31 일몰 예정이라, 개정안이 통과되지 않을 때 적용되는 공제율은 별도 확인이 필요해요."}
+];
+
+function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
+return{type:$("ptype").value,inc:$("pinc").value,tb:$("ptb").value,deps:d,
+r:{hh:$("rhh").value,house:$("rhouse").checked,move:$("rmove").checked,sin:$("rsin").checked},
+b:{form:$("bform").value,prev:$("bprev").value,ind:$("bind").checked}}}
+function addDep(o){o=o||{};var r=document.createElement("div");r.className="dep";
+r.innerHTML='<div class="row"><label>관계<select class="d-rel"><option value="spouse">배우자</option><option value="asc">직계존속 (부모 등)</option><option value="desc">직계비속 (자녀 등)</option><option value="sib">형제자매</option></select></label><label>나이<input class="d-age" type="number" inputmode="numeric" min="0" placeholder="세"></label><label>소득 기준<select class="d-kind"><option value="inc">소득금액</option><option value="pay">총급여 (근로소득만)</option></select></label><label>연 소득 (만원)<input class="d-amt" type="number" inputmode="numeric" min="0" placeholder="0"></label></div><div class="foot"><label class="chk"><input type="checkbox" class="d-live">생계를 같이함</label><label class="chk"><input type="checkbox" class="d-dis">장애인</label><button type="button" class="del">삭제</button></div>';
+if(o.rel){r.querySelector(".d-rel").value=o.rel;r.querySelector(".d-age").value=o.age;r.querySelector(".d-kind").value=o.kind;r.querySelector(".d-amt").value=o.amt;r.querySelector(".d-live").checked=!!o.live;r.querySelector(".d-dis").checked=!!o.dis}
+r.querySelector(".del").onclick=function(){r.remove();run()};$("deps").appendChild(r)}
+function sign(x){var a=Math.abs(x);return x>0?'<strong class="good">−'+fmt(a)+'</strong>':x<0?'<strong class="bad">+'+fmt(a)+'</strong>':'<strong class="flat">변화 없음</strong>'}
+function readI(ix){var o={};ITEMS[ix].f.forEach(function(f){o[f.k]=$("f"+ix+f.k).value});return o}
+function run(){
+var P=readP();$("pincl").textContent=P.type=="wage"?"연 총급여 (만원)":"연 종합소득금액 (만원)";
+$("mr").textContent=P.tb===""?"":"적용 한계세율 "+mr(P.tb)+"% (소득세 기본세율 기준)";
+var total=0,any=false,pass=0,chg=0;
+ITEMS.forEach(function(it,ix){
+var i=readI(ix),res=$("r"+ix),msg=it.need(P,i);
+if(it.passed)pass++;if(it.passed&&it.fin&&it.fin.changed)chg++;
+if(msg){res.className="res";res.innerHTML='<p class="need">'+msg+'</p>';return}
+var fin=(it.passed&&it.fin)?it.fin:null,c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,e=b.v-c.v;
+if(!it.cash){total+=e;any=true}
+res.className="res"+(f?" fin":"");
+res.innerHTML='<div class="tag">'+(f?"국회 확정안 기준 · 본회의 통과":"정부안 기준 시뮬레이션 · 확정 아님")+'</div>'+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e)+'</div><p class="note">'+it.note+'</p>';
+});
+$("s1").textContent=pass+" / "+ITEMS.length+"건";$("s2").textContent=chg+"건";
+$("s3").innerHTML=any?sign(total):"입력 전";
+}
+function tab(n){for(var k=0;k<4;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
+[0,1,2,3].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
+document.addEventListener("click",function(e){var a=e.target.closest("[data-tab]");if(a){e.preventDefault();tab(+a.dataset.tab);$("me").scrollIntoView({behavior:"smooth"})}});
+$("banner").textContent="정부안 · 본회의 미통과 · 확정 아님 — 본회의를 통과하면 확정안이 표시돼요";
+var box=$("cards");
+ITEMS.forEach(function(it,ix){
+var a=document.createElement("article");a.className="card"+(it.passed?" done":"");
+var fh=it.f.map(function(f){var id="f"+ix+f.k;return '<div class="fld"><label for="'+id+'">'+f.l+'</label><input id="'+id+'" type="number" inputmode="numeric" min="0" placeholder="'+f.ph+'"></div>'}).join("");
+var fin=it.passed&&it.fin;
+var stat=it.passed?'<span class="pill ok">본회의 통과</span> '+(fin&&fin.changed?'<span class="pill">정부안에서 수정됨</span>':'<span class="pill ok">정부안 그대로 통과</span>'):'<span class="pill">본회의 미통과</span>';
+var st=it.passed?(fin&&fin.changed?"정부안과 달라진 점: "+fin.diff:"국회 심의에서 정부안이 바뀌지 않았어요."):"본회의 의결은 12월 예정이에요. 통과 후 정부안 대비 달라진 내용이 여기에 표시돼요.";
+a.innerHTML='<div class="top"><span class="tax">'+it.tax+'</span>'+stat+'</div><h3 class="t">'+it.title+'</h3><p class="st">'+st+'</p><div class="cmp"><div><h4>현행</h4><p>'+it.cur+'</p></div><div class="g"><h4>정부안</h4><p>'+it.gov+'</p></div><div class="f'+(fin?" on":"")+'"><h4>국회 확정안</h4><p>'+(fin?fin.text:"본회의 통과 후 표시돼요")+'</p></div></div><p class="why"><b>개정 취지</b> '+it.why+'</p><p class="meta">적용 시기: '+it.when+'</p><div class="sim">'+fh+'<div class="res" id="r'+ix+'" aria-live="polite"></div></div>';
+box.appendChild(a)});
+document.addEventListener("input",run);document.addEventListener("change",run);
+$("addDep").onclick=function(){addDep();run()};
+$("demo").onclick=function(){$("ptype").value="wage";$("pinc").value=5000;$("ptb").value=3500;$("deps").innerHTML="";
+addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:23,kind:"pay",amt:600});addDep({rel:"spouse",age:"",kind:"pay",amt:700});
+$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin").checked=false;
+$("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;
+var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000};for(var k in d)$(k).value=d[k];run()};
+run();
+</script>
+</body>
+</html>
