@@ -7,6 +7,8 @@
 
 ## 실행 방법
 
+**바로 열기: https://qortkddn.github.io/Tax-reform-tracker/**
+
 `index.html`을 브라우저에서 열면 됩니다. 설치나 서버가 필요 없습니다.
 GitHub Pages를 켜면 링크 하나로 공유할 수 있습니다 (Settings → Pages → Branch: `main` / root).
 
