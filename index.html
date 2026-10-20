@@ -210,6 +210,7 @@ function mr(tb){for(var i=0;i<BR.length;i++)if(+tb<=BR[i][0])return BR[i][1]*100
 function prog(tb){if(tb<=0)return 0;for(var i=0;i<BR.length;i++)if(tb<=BR[i][0])return tb*BR[i][1]-BR[i][2]}
 function rentRate(P){var a=+P.inc;return P.type=="wage"?(a<=5500?.17:a<=8000?.15:0):(a<=4500?.17:a<=7000?.15:0)}
 function sign(x){var a=Math.abs(x);return x>0.5?'<strong class="good">−'+fmt(a)+'</strong>':x<-0.5?'<strong class="bad">+'+fmt(a)+'</strong>':'<strong class="flat">변화 없음</strong>'}
+function psign(x){return x>0.5?'<strong class="good">+'+fmt(x)+'</strong>':x<-0.5?'<strong class="bad">−'+fmt(-x)+'</strong>':'<strong class="flat">변화 없음</strong>'}
 function go(s,t){return ' <a href="#p-'+s+'" data-sec="'+s+'"'+(t!=null?' data-sub="'+t+'"':'')+'>입력하기</a>'}
 function verdict(r){return r.ok?'<span class="y">공제</span>':'<span class="n">제외</span> ('+r.w.join(", ")+')'}
 
@@ -228,9 +229,11 @@ function rentOK(P){var w=[];
  if(!rentRate(P))w.push("소득요건");
  return{ok:!w.length,w:w}}
 var DEP_C={inc:100,pay:500},DEP_G={inc:300,pay:750};
-function incCalc(P,gov){var nc=nDeps(P,DEP_C),n=gov?nDeps(P,DEP_G):nc,tb=Math.max(+P.tb-150*(n-nc),0),calc=prog(tb),rent=$("f1rent").value;
- var rc=(rent!==""&&rentOK(P).ok)?Math.min(+rent,gov?1200:1000)*rentRate(P):0,cr=Math.min(rc,calc);
- return{n:n,tb:tb,calc:calc,rent:rc,cr:cr,dec:calc-cr,tot:(calc-cr)*1.1}}
+function incCalc(P,gov){var nc=nDeps(P,DEP_C),n=gov?nDeps(P,DEP_G):nc,ci=readI(11),li=readI(12),biz=P.type=="biz",car=0;
+ if(gov&&biz&&ci.price!==""&&ci.biz!=="")car=carDed(ci,CAR_G[ci.kind]).ok-carDed(ci,800).ok;
+ var tb=Math.max(+P.tb-150*(n-nc)-car,0),calc=prog(tb),rent=$("f1rent").value;
+ var rc=(rent!==""&&rentOK(P).ok)?Math.min(+rent,gov?1200:1000)*rentRate(P):0,lc=biz?leaveCr(li,!gov):0,cr=Math.min(rc+lc,calc);
+ return{n:n,car:car,tb:tb,calc:calc,rent:rc,leave:lc,cr:cr,dec:calc-cr,tot:(calc-cr)*1.1}}
 
 /* ── 부가가치세 요건 ── */
 function cardOK(P){var w=[];
@@ -238,6 +241,14 @@ function cardOK(P){var w=[];
  if(!P.b.ind)w.push("대상 업종 아님");
  if(+P.b.prev>100000)w.push("직전연도 공급가액 10억원 초과");
  return{ok:!w.length,w:w}}
+/* ── 근로장려금·업무용 승용차·육아휴직 ── */
+var EITC={single:[400,900,2200,165,2600,180,900],one:[700,1400,3200,285,3700,310,1400],two:[800,1700,4400,330,5200,360,1800]};
+function eitcRaw(t,inc,gov){var e=EITC[t],a=e[0],b=gov?e[6]:e[1],c=gov?e[4]:e[2],m=gov?e[5]:e[3];if(inc<=0||inc>=c)return[0,"대상 아님 (소득요건)"];if(inc<a)return[inc*m/a,"점증구간"];if(inc<=b)return[m,"평탄구간 (최대)"];return[m-(inc-b)*m/(c-b),"점감구간"]}
+function carDed(i,lim){var dep=+i.price/5*(+i.biz/100);return{dep:dep,ok:Math.min(dep,lim),over:Math.max(dep-lim,0)}}
+var CAR_C={eco:800,ice:800},CAR_G={eco:1000,ice:700};
+function carYears(i,lim){var tot=+i.price*(+i.biz/100),dep=tot/5;return dep<=lim?5:Math.ceil(tot/lim)}
+function leaveCr(i,on){return(on&&i.ok&&i.n!=="")?+i.n*(i.size=="sme"?1300:900):0}
+function bizNeed(P){return P.type!="biz"?"개인사업자에게만 해당돼요. 소득 탭에서 소득 유형을 사업자로 바꿔 주세요."+go("inc",0):P.tb===""?"종합소득 과세표준을 입력해 주세요."+go("inc",0):""}
 function deemed(P,pref){var s=$("f3sales").value,b=$("f3buy").value;if(s===""||b==="")return{v:0,l:"-"};var r,l;if(P.b.form=="corp"){r=6/106;l="6/106"}else if(pref&&+s<=40000){r=9/109;l="9/109"}else{r=8/108;l="8/108"}return{v:+b*W*r,l:l}}
 function card(P,gov){var p=$("f4pay").value;if(p===""||!cardOK(P).ok)return 0;return Math.min(+p*W*(gov?.012:.013),(gov?500:1000)*W)}
 
@@ -361,7 +372,37 @@ why:"정부가 밝힌 구체적 취지는 아직 확인하지 못했어요. 거�
 f:[{k:"acq",l:"신규주택 취득일",t:"date"},{k:"adj",l:"종전주택과 신규주택이 모두 조정대상지역에 있어요",t:"chk"}],
 need:function(P,i){return i.acq===""?"신규주택 취득일을 입력해 주세요.":""},
 custom:function(P,i){var d=new Date(i.acq),c=addY(d,3),g=addY(d,i.adj?2:3);
- return '<dl><dt>현행 처분기한</dt><dd>'+ymd(c)+'까지</dd><dt>정부안 처분기한</dt><dd>'+ymd(g)+'까지</dd></dl><div class="main"><span>처분기한 변화</span>'+(i.adj?'<strong class="bad">1년 단축</strong>':'<strong class="flat">변화 없음</strong>')+'</div><p class="note">'+(i.adj?'기한을 넘기면 종전주택 양도 때 1세대 1주택 비과세를 받을 수 없어요. ':'둘 중 하나라도 조정대상지역이 아니면 현행 3년이 유지돼요. ')+'어떤 취득분부터 적용되는지는 확인이 필요해요.</p>'}}
+ return '<dl><dt>현행 처분기한</dt><dd>'+ymd(c)+'까지</dd><dt>정부안 처분기한</dt><dd>'+ymd(g)+'까지</dd></dl><div class="main"><span>처분기한 변화</span>'+(i.adj?'<strong class="bad">1년 단축</strong>':'<strong class="flat">변화 없음</strong>')+'</div><p class="note">'+(i.adj?'기한을 넘기면 종전주택 양도 때 1세대 1주택 비과세를 받을 수 없어요. ':'둘 중 하나라도 조정대상지역이 아니면 현행 3년이 유지돼요. ')+'어떤 취득분부터 적용되는지는 확인이 필요해요.</p>'}},
+{sec:"inc",title:"근로장려금(EITC) 확대",passed:false,fin:null,
+cur:"총소득 단독 2,200만 / 홑벌이 3,200만 / 맞벌이 4,400만원 미만. 최대지급액 165만 / 285만 / 330만원",
+gov:"총소득 2,600만 / 3,700만 / 5,200만원 미만. 최대지급액 180만 / 310만 / 360만원. 맞벌이 평탄구간 상한 1,700만 → 1,800만원",
+pc:{g:false},pg:{g:true},
+why:"2027년 최저임금 근로자까지 포함하도록 소득요건을 올리고, 2022년 이후 물가를 반영해 최대지급액을 약 9% 올리려는 취지예요. 맞벌이 평탄구간 확대는 혼인에 따른 불이익을 줄이기 위한 거예요.",when:"2027.1.1 이후 개시하는 과세기간분부터",
+f:[{k:"hh",l:"가구 유형",t:"sel",o:[["single","단독 가구"],["one","홑벌이 가구"],["two","맞벌이 가구"]]},{k:"tot",l:"부부 합산 연 총소득 (만원)",ph:"근로·사업·종교인소득 합계"},{k:"asset",l:"가구원 재산 합계 (만원)",ph:"주택·토지·예금 등, 부채 차감 전"}],
+need:function(P,i){return i.tot===""||i.asset===""?"총소득과 재산 합계를 입력해 주세요.":""},
+amt:function(P,i,p){var a=+i.asset;if(a>=24000)return{v:0,t:"대상 아님 (재산요건)"};var r=eitcRaw(i.hh,+i.tot,p.g),v=r[0]*(a>=17000?.5:1);return{v:v*W,t:v>0?man(v):"대상 아님"}},
+detail:function(P,it,f,i){var a=+i.asset,c=eitcRaw(i.hh,+i.tot,false),g=eitcRaw(i.hh,+i.tot,true);return '<li>현행 '+c[1]+' → 정부안 '+g[1]+'</li>'+(a>=24000?'<li><span class="n">재산 2.4억원 이상</span>이라 지급 대상이 아니에요</li>':a>=17000?'<li>재산 1.7억원 이상이라 산정액의 <b>50%</b>만 지급돼요</li>':'')},
+ml:"근로장려금 변화",pos:true,note:"점증·점감 구간은 소득요건과 최대지급액을 잇는 직선으로 계산했어요. 국세청 산정표와는 몇천 원 차이가 날 수 있어요. 재산요건(2.4억원 미만, 1.7억원 이상 50% 감액)은 현행 기준이에요. 세금이 아니라 지급액이라 통합 계산에는 넣지 않았어요."},
+{sec:"inc",title:"업무용 승용차 감가상각비 한도 조정",passed:false,fin:null,
+cur:"차종과 관계없이 감가상각비 연 800만원까지 비용 인정 (5년 정액법, 초과분은 다음 해로 이월)",
+gov:"전기·수소차 연 1,000만원으로 상향, 내연기관차 등 기타 차량 연 700만원으로 하향",
+pc:{lim:CAR_C},pg:{lim:CAR_G},
+why:"친환경차 전환을 유도하고 비싼 전기·수소차의 세제상 불리함을 줄이려는 취지예요. 세수 감소분은 내연기관차 한도 축소로 일부 보완해요.",when:"2027.1.1 이후 새로 취득·임차하는 차량부터",
+f:[{k:"kind",l:"차종",t:"sel",o:[["ice","내연기관·하이브리드 등"],["eco","전기차·수소차"]]},{k:"price",l:"취득가액 (만원)",ph:"예: 6000"},{k:"biz",l:"업무사용비율 (%)",ph:"운행기록부 기준, 예: 100"}],
+need:function(P,i){return i.price===""||i.biz===""?"취득가액과 업무사용비율을 입력해 주세요.":bizNeed(P)},
+amt:function(P,i,p){var d=carDed(i,p.lim[i.kind]),base=carDed(i,800).ok;return{v:-prog(Math.max(+P.tb-(d.ok-base),0))*1.1*W,t:"연 "+man(d.ok)+" 비용 인정"+(d.over>0?" · "+man(d.over)+" 이월":"")}},
+detail:function(P,it,f,i){var c=carYears(i,800),g=carYears(i,CAR_G[i.kind]);return '<li>연 감가상각비 '+man(+i.price/5*(+i.biz/100))+' (취득가 ÷ 5년 × 업무사용비율)</li><li>구입비 전액을 비용으로 처리하는 데 현행 <b>'+c+'년</b> → 정부안 <b>'+g+'년</b></li>'},
+ml:"올해 소득세 변화 (지방소득세 포함)",note:"한도를 넘는 금액도 결국 이월돼 전액 비용 처리되므로, 개정 효과는 총액이 아니라 비용 인정 시기의 차이예요. 하이브리드는 '기타 차량'으로 보고 700만원을 적용했어요. 복식부기의무자인 개인사업자 기준이에요."},
+{sec:"inc",title:"육아휴직 복귀자 추가공제 종료",passed:false,fin:null,
+cur:"6개월 이상 육아휴직 후 복귀한 근로자 1인당 중소기업 1,300만원, 중견기업 900만원 추가 세액공제 (2026.12.31까지)",
+gov:"적용기한을 연장하지 않아 종료. 2027년 시행 예정인 '행복한 일터 인증제'와 연계한 새 세제지원으로 대체 추진",
+pc:{on:true},pg:{on:false},
+why:"통합고용세액공제 대상을 합리화하고, 지원을 중소·중견기업과 근로환경 개선 쪽으로 재편하려는 취지예요.",when:"2027년 이후 복귀분부터 공제 없음 (발표 기준)",
+f:[{k:"size",l:"기업 규모",t:"sel",o:[["sme","중소기업"],["mid","중견기업"]]},{k:"n",l:"올해 육아휴직 복귀자 수 (명)",ph:"예: 1"},{k:"ok",l:"6개월 이상 육아휴직 후 복귀했고, 상시근로자 수가 직전 연도보다 줄지 않았어요",t:"chk"}],
+need:function(P,i){return i.n===""?"복귀자 수를 입력해 주세요.":bizNeed(P)},
+amt:function(P,i,p){var cr=leaveCr(i,p.on),tax=Math.max(prog(+P.tb)-cr,0);return{v:-tax*1.1*W,t:cr?"추가공제 "+man(cr):"공제 없음"}},
+detail:function(P,it,f,i){return '<li>'+(i.ok?'<span class="y">요건 충족</span> · 1인당 '+(i.size=="sme"?"1,300만원":"900만원"):'<span class="n">요건 미충족</span>: 6개월 이상 휴직 후 복귀, 상시근로자 수 유지가 필요해요')+'</li>'},
+ml:"소득세 변화 (지방소득세 포함)",note:"세액공제는 산출세액 한도 안에서만 반영했고, 최저한세는 반영하지 않았어요. 새 '행복한 일터 인증제' 연계 지원은 내용이 정해지지 않아 넣지 않았어요."}
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
@@ -381,8 +422,8 @@ inc:"누진세율 구조라 항목별 효과를 단순히 더하면 실제와 �
 cg:"선택한 양도 연도에 정부안의 모든 양도세 개정을 한 번에 반영해 과세표준부터 다시 계산해요."};
 function integ(P,sec){
  if(sec=="inc"){if(P.tb==="")return{h:'<p class="need">현재 기준 종합소득 과세표준을 입력하면 계산돼요.'+go("inc",0)+'</p>'};
-  var a=incCalc(P,false),g=incCalc(P,true),e=(a.tot-g.tot)*W,simple=0;[0,1].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});
-  return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]],true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과의 단순 합은 '+(simple>=0?"−":"+")+fmt(Math.abs(simple))+'로, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(a.rent>a.cr||g.rent>g.cr?' 월세세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분은 최종 세액이 아니라 제외했어요.</p>'}}
+  var a=incCalc(P,false),g=incCalc(P,true),e=(a.tot-g.tot)*W,simple=0;[0,1,11,12].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});
+  return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["업무용 승용차 추가 비용",man(0),man(g.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.rent),man(g.rent)],["육아휴직 복귀자 추가공제",man(a.leave),man(g.leave)],["세액공제 합계 (산출세액 한도)",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]],true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과의 단순 합은 '+(simple>=0?"−":"+")+fmt(Math.abs(simple))+'로, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(a.rent+a.leave>a.cr||g.rent+g.leave>g.cr?' 세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분과 근로장려금은 세액이 아니라 제외했어요.</p>'}}
  if(sec=="vat"){var s3=$("f3sales").value,s4=$("f4pay").value;if((s3===""||$("f3buy").value==="")&&s4==="")return{h:'<p class="need">아래 항목에 매출·매입액이나 카드 결제금액을 입력하면 계산돼요.</p>'};
   var dc=deemed(P,false).v,dg=deemed(P,true).v,cc=card(P,false),cg2=card(P,true),N=P.b.net;
   if(N===""){var e=(dg+cg2)-(dc+cc);return{e:e,h:tbl(["","현행","정부안"],[["의제매입세액공제",fmt(dc),fmt(dg)],["신용카드 매출 세액공제",fmt(cc),fmt(cg2)],["공제 합계",fmt(dc+cc),fmt(dg+cg2)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e)+'</div><p class="note">공제 전 납부세액을 넣으면 카드 공제의 납부세액 한도까지 반영해요.'+go("vat")+'</p>'}}
@@ -405,7 +446,7 @@ var fin=(it.passed&&it.fin)?it.fin:null,tag='<div class="tag">'+(fin?"국회 확
 res.className="res"+(fin?" fin":"");
 if(it.custom){res.innerHTML=tag+it.custom(P,i,fin);return}
 var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,e=b.v-c.v;
-res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e)+'</div><p class="note">'+it.note+'</p>';
+res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+(it.pos?psign(e):sign(e))+'</div><p class="note">'+it.note+'</p>';
 });
 $("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b>';
 $("sum").innerHTML=SECS.map(function(s){var r=integ(P,s[0]);$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+s[1]+' 세액 효과</small><b>'+(r.e!=null?sign(r.e):'<span class="flat">입력 전</span>')+'</b></button>'}).join("");
@@ -419,7 +460,7 @@ document.addEventListener("click",function(e){var a=e.target.closest("[data-sec]
 $("banner").textContent="정부안 · 본회의 미통과 · 확정 아님 — 본회의를 통과하면 확정안이 표시돼요";
 ITEMS.forEach(function(it,ix){
 var a=document.createElement("article");a.className="card"+(it.passed?" done":"");
-var fh=it.f.map(function(f){var id="f"+ix+f.k;if(f.t=="chk")return '<label class="chk"><input type="checkbox" id="'+id+'">'+f.l+'</label>';return '<div class="fld"><label for="'+id+'">'+f.l+'</label><input id="'+id+'" type="'+(f.t=="date"?"date":"number")+'"'+(f.t=="date"?'':' inputmode="numeric" min="0" placeholder="'+f.ph+'"')+'></div>'}).join("");
+var fh=it.f.map(function(f){var id="f"+ix+f.k;if(f.t=="sel")return '<div class="fld"><label for="'+id+'">'+f.l+'</label><select id="'+id+'">'+f.o.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>'}).join("")+'</select></div>';if(f.t=="chk")return '<label class="chk"><input type="checkbox" id="'+id+'">'+f.l+'</label>';return '<div class="fld"><label for="'+id+'">'+f.l+'</label><input id="'+id+'" type="'+(f.t=="date"?"date":"number")+'"'+(f.t=="date"?'':' inputmode="numeric" min="0" placeholder="'+f.ph+'"')+'></div>'}).join("");
 var fin=it.passed&&it.fin;
 var stat=it.passed?'<span class="pill ok">본회의 통과</span> '+(fin&&fin.changed?'<span class="pill">정부안에서 수정됨</span>':'<span class="pill ok">정부안 그대로 통과</span>'):'<span class="pill">본회의 미통과</span>';
 var st=it.passed?(fin&&fin.changed?"정부안과 달라진 점: "+fin.diff:"국회 심의에서 정부안이 바뀌지 않았어요."):"본회의 의결은 12월 예정이에요. 통과 후 정부안 대비 달라진 내용이 여기에 표시돼요.";
@@ -432,7 +473,7 @@ addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:2
 $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin").checked=false;
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("csell").value=200000;$("cbuy").value=80000;$("cexp").value=3000;$("cy").value="2028";$("chold").value=12;$("clive").value=6;$("ccnt").value="1";$("creg").value="y";$("cadj").checked=true;$("c1h").checked=true;$("csen").checked=true;
-var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15"};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;run()};
+var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="one";$("f11kind").value="eco";$("f12ok").checked=true;run()};
 var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"inc");
 run();
 </script>
