@@ -353,7 +353,12 @@ why:"보유 기간보다 실제 거주 기간을 중심으로 혜택을 설계�
 need:cgNeed,amt:cgAmt,
 detail:function(P){var b=cgB(P),a=cgCalc(P,CUR);if(!b.reg)return '<li><span class="n">해당 없음</span>: 미등기 양도는 공제가 배제돼요</li>';if(a.exempt)return '<li><span class="y">비과세</span> · 양도가액 12억원 이하</li>';if(!b.one)return '<li><span class="n">해당 없음</span>: 1세대 1주택(비과세 요건 충족)만 개편 대상이에요. 다주택은 일반 공제(보유 연 2%)가 유지되고, 중과 대상이면 공제가 배제돼요.</li>';
  return '<li>양도차익 '+man(a.gain)+' 중 과세 대상 '+man(a.tx)+' (12억원 초과분 비율)</li><li><b>양도 연도별 정부안</b><table class="yr"><tr><th>양도 연도</th><th>공제율</th><th>세액</th></tr>'+YRS.map(function(y){var r=cgCalc(P,only("lt","Y"),y[0]);return '<tr'+(y[0]==P.c.y?' class="sel"':'')+'><td>'+y[1]+'</td><td>'+Math.round(r.rate*100)+'%'+(r.capped?' (상한)':'')+'</td><td>'+man(r.tax)+'</td></tr>'}).join("")+'</table></li>'},
-ml:"양도소득세 변화 (지방소득세 포함)",note:"정부안의 연수별 최대 공제율과 경과조치가 확인되지 않아 보유·거주를 각각 10년까지 인정한다고 가정했어요. 거주 2년 미만은 일반 공제(보유 연 2%, 최대 30%)를 적용했어요."},
+guide:[["1세대 판정",'<ul><li><b>1세대</b> = 본인과 배우자, 같은 주소에서 생계를 같이하는 가족이에요. 배우자는 따로 살아도 <b>같은 세대</b>로 봐요.</li><li>배우자가 없어도 30세 이상이거나, 이혼·사별했거나, 기준중위소득 40% 이상의 소득이 있는 성년이면 단독 세대로 인정돼요.</li><li>부모님 집에 같이 살며 주민등록이 같으면 부모님 주택까지 합쳐 주택 수를 세요.</li></ul>'],
+["주택 수 세는 법",'<table><tr><th>대상</th><th>주택 수 포함 여부</th></tr><tr><td>세대원 전원 보유 주택</td><td>모두 합산</td></tr><tr><td>공동소유 주택</td><td>지분이 작아도 각자 1주택</td></tr><tr><td>주거용 오피스텔</td><td>실제 주거용이면 주택</td></tr><tr><td>조합원입주권</td><td>주택 수에 포함</td></tr><tr><td>분양권</td><td>2021.1.1 이후 취득분부터 포함</td></tr></table><p>판정 시점은 <b>양도일</b>이에요. 근로장려금처럼 6월 1일 기준이 아니에요.</p>'],
+["가액 기준",'<table><tr><th>세법</th><th>평가 기준</th></tr><tr><td><b>양도소득세</b></td><td><b>실지거래가액</b> (실제 사고판 가격)</td></tr><tr><td>근로장려금 재산</td><td>공시가격 (시가표준액)</td></tr><tr><td>종합부동산세</td><td>공시가격 × 공정시장가액비율</td></tr></table><p>그래서 <b>12억원 비과세 기준</b>은 공시가격이 아니라 실제 양도가액으로 판단해요. 공시가격 8억원이어도 13억원에 팔면 고가주택이에요.</p>'],
+["기간 계산",'<ul><li><b>보유기간</b>: 취득일(잔금일과 등기접수일 중 빠른 날)부터 양도일까지예요.</li><li><b>거주기간</b>: 주민등록과 실제 거주가 모두 있어야 인정돼요.</li><li>비과세는 2년 이상 보유가 필요하고, 2017.8.3 이후 조정대상지역에서 취득했다면 2년 거주도 필요해요.</li><li>장기보유특별공제 우대(보유+거주 공제)도 거주 2년 이상이어야 해요. 미달이면 일반 공제(연 2%)예요.</li></ul>'],
+["등기·미등기",'<ul><li>취득하고 <b>등기하지 않은 채</b> 팔면 미등기 양도예요.</li><li>세율 70% 단일세율이 적용되고, 장기보유특별공제·기본공제·비과세·감면이 모두 배제돼요.</li><li>장기할부 취득이나 법령상 등기가 불가능한 경우처럼 예외로 인정되는 경우도 있어요.</li></ul>'],
+["필요경비 계산기",'<div class="grid"><div class="fld"><label for="ce1">취득세 등 취득 부대비용 (만원)</label><input id="ce1" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce2">중개수수료 (취득·양도) (만원)</label><input id="ce2" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce3">법무사·세무사 비용 (만원)</label><input id="ce3" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce4">자본적 지출 (만원)</label><input id="ce4" class="cin" type="number" inputmode="numeric" min="0" placeholder="샷시·확장·보일러 교체 등"></div></div><p class="note">도배·장판·싱크대 교체 같은 <b>수익적 지출</b>은 넣지 않아요. 적격증빙이 있어야 인정돼요.</p><p class="sumline" id="cesum">필요경비 합계 0원</p><button type="button" id="ceapply">이 금액을 필요경비에 넣기</button>']],ml:"양도소득세 변화 (지방소득세 포함)",note:"정부안의 연수별 최대 공제율과 경과조치가 확인되지 않아 보유·거주를 각각 10년까지 인정한다고 가정했어요. 거주 2년 미만은 일반 공제(보유 연 2%, 최대 30%)를 적용했어요."},
 {sec:"cg",title:"1주택자 양도소득 기본공제 상향",passed:false,fin:null,
 cur:"양도소득 기본공제 연 250만원",
 gov:"10년 이상 거주한 1세대 1주택자(양도가액 30억원 이하)는 연 2,500만원",
@@ -370,7 +375,9 @@ why:"보유세가 단계적으로 오르는 다주택자에게 처분 기회를 
 need:cgNeed,amt:cgAmt,
 detail:function(P){var b=cgB(P);if(!b.reg)return '<li><span class="n">해당 없음</span>: 미등기는 70% 단일세율이 적용돼요</li>';if(b.n<2||!b.adj)return '<li><span class="n">중과 대상 아님</span>: 조정대상지역 주택을 2주택 이상 보유한 상태에서 양도할 때만 해당돼요</li>';
  return (b.h<2?'<li><span class="n">완화 대상 아님</span>: 보유 2년 미만은 현행 중과세율이 유지돼요</li>':'')+'<li><b>양도 연도별 정부안</b><table class="yr"><tr><th>양도 연도</th><th>가산세율</th><th>세액</th></tr>'+YRS.map(function(y){var r=cgCalc(P,only("hv","gov"),y[0]);return '<tr'+(y[0]==P.c.y?' class="sel"':'')+'><td>'+y[1]+'</td><td>+'+r.sur+'%p</td><td>'+man(r.tax)+'</td></tr>'}).join("")+'</table></li>'},
-ml:"양도소득세 변화 (지방소득세 포함)",note:"완화 기간에도 장기보유특별공제는 배제된다고 가정했어요. 2026년 양도분 소급 적용과 중과 배제 주택은 반영하지 않았어요."},
+guide:[["중과 대상",'<ul><li>양도하는 주택이 <b>조정대상지역</b>에 있고, 양도일 현재 세대가 2주택 이상일 때만 중과돼요.</li><li>중과 대상이면 장기보유특별공제를 받을 수 없어요.</li><li>보유 2년 미만이면 단기세율(1년 미만 70%, 2년 미만 60%)과 비교해 큰 세액을 내요.</li></ul>'],
+["중과 주택 수",'<ul><li>수도권·광역시·세종시(읍·면 제외) <b>밖</b>에 있는 <b>공시가격 3억원 이하</b> 주택은 중과 주택 수를 셀 때 빼요.</li><li>그래서 일반 주택 수와 중과 주택 수가 다를 수 있어요. 예: 서울 아파트 1채 + 지방 공시가격 2억원 주택 1채 → 중과 판정에서는 1주택이에요.</li><li>주택 수에는 조합원입주권과 2021년 이후 취득한 분양권도 포함돼요.</li></ul>'],
+["중과 배제",'<p>요건을 갖춘 장기임대주택, 상속주택(일정 기간), 일시적 2주택의 종전주택 등은 중과에서 빠져요. 이 트래커는 중과 배제 주택을 반영하지 않으니, 해당되면 실제 세액은 더 낮을 수 있어요.</p>']],ml:"양도소득세 변화 (지방소득세 포함)",note:"완화 기간에도 장기보유특별공제는 배제된다고 가정했어요. 2026년 양도분 소급 적용과 중과 배제 주택은 반영하지 않았어요."},
 {sec:"cg",title:"고령자 비수도권 이주 양도세 감면 신설",passed:false,fin:null,
 cur:"해당 특례 없음",
 gov:"만 65세 이상 1세대 1주택자가 5년 이상 거주한 수도권 주택을 팔고 비수도권으로 이주하면 양도세 감면: 2027년 양도 50%, 2028년 양도 30%",
@@ -386,7 +393,8 @@ gov:"모두 조정대상지역인 경우 처분기한을 2년으로 단축 (종�
 why:"정부가 밝힌 구체적 취지는 아직 확인하지 못했어요. 거주 중심 개편의 일환으로 소개되고 있어요.",when:"적용 대상 취득분 확인 필요",
 f:[{k:"acq",l:"신규주택 취득일",t:"date"},{k:"adj",l:"종전주택과 신규주택이 모두 조정대상지역에 있어요",t:"chk"}],
 need:function(P,i){return i.acq===""?"신규주택 취득일을 입력해 주세요.":""},
-custom:function(P,i){var d=new Date(i.acq),c=addY(d,3),g=addY(d,i.adj?2:3);
+guide:[["요건",'<ul><li>종전주택을 취득하고 <b>1년 이상 지난 뒤</b> 신규주택을 취득해야 해요.</li><li>신규주택 취득일부터 처분기한 안에 종전주택을 팔아야 해요 (현행 3년, 정부안은 둘 다 조정대상지역이면 2년).</li><li>종전주택은 그 자체로 1세대 1주택 비과세 요건(2년 보유, 조정지역 취득분은 2년 거주)을 갖춰야 해요.</li></ul>'],
+["기한 세는 법",'<p>기한은 신규주택의 <b>취득일(잔금일과 등기접수일 중 빠른 날)</b>부터 세고, 종전주택의 <b>양도일(잔금일)</b>이 기한 안에 있어야 해요. 계약일이 아니라 잔금일 기준이라 일정이 밀리면 기한을 넘길 수 있어요.</p>']],custom:function(P,i){var d=new Date(i.acq),c=addY(d,3),g=addY(d,i.adj?2:3);
  return '<dl><dt>현행 처분기한</dt><dd>'+ymd(c)+'까지</dd><dt>정부안 처분기한</dt><dd>'+ymd(g)+'까지</dd></dl><div class="main"><span>처분기한 변화</span>'+(i.adj?'<strong class="bad">1년 단축</strong>':'<strong class="flat">변화 없음</strong>')+'</div><p class="note">'+(i.adj?'기한을 넘기면 종전주택 양도 때 1세대 1주택 비과세를 받을 수 없어요. ':'둘 중 하나라도 조정대상지역이 아니면 현행 3년이 유지돼요. ')+'어떤 취득분부터 적용되는지는 확인이 필요해요.</p>'}},
 {sec:"inc",title:"근로장려금(EITC) 확대",passed:false,fin:null,
 cur:"총소득 단독 2,200만 / 홑벌이 3,200만 / 맞벌이 4,400만원 미만. 최대지급액 165만 / 285만 / 330만원",
@@ -496,6 +504,9 @@ var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9a
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
 function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v("gbase"),fam=$("gfam").checked,d=dep?(base?(fam?base:Math.min(dep,base*.55)):dep):0,t=v("gh")+v("gcar")+v("gfin")+v("getc")+d;$("gsum").innerHTML="재산 합계 "+man(t)+(dep&&base?" (전세금 "+man(d)+(fam?", 기준시가 100%":dep>base*.55?", 간주전세금 적용":", 실제 전세금 적용")+")":"");return t}
 document.addEventListener("input",function(e){if(e.target.classList.contains("gin"))gsum()});document.addEventListener("change",function(e){if(e.target.classList.contains("gin"))gsum()});
+function cesum(){var t=["ce1","ce2","ce3","ce4"].reduce(function(a,id){return a+(+$(id).value||0)},0);$("cesum").textContent="필요경비 합계 "+man(t);return t}
+document.addEventListener("input",function(e){if(e.target.classList.contains("cin"))cesum()});
+$("ceapply").onclick=function(){$("cexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
 var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"inc");
 run();
