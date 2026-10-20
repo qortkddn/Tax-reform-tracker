@@ -116,6 +116,20 @@ details.guide[open]>summary::before{content:"▾ ";}
 .gp th{color:var(--sub);font-weight:600}
 .gp .ex{background:var(--bg);border-radius:6px;padding:8px 10px;margin:0 0 8px}
 .gp .sumline{font-weight:700;margin:8px 0}
+section>.cards{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 22px}
+section>.cards::-webkit-scrollbar{display:none}
+section>.cards>.card{flex:0 0 100%;scroll-snap-align:start;margin:0}
+.cnav{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.cnav .arr{flex:none;width:40px;height:40px;padding:0;font-size:20px;line-height:1}
+.cnav .arr:disabled{opacity:.35;cursor:default}
+.chips{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;font-size:13px;font-weight:600;padding:6px 10px;border-radius:99px;color:var(--sub);white-space:nowrap}
+.chips button[aria-current="true"]{background:var(--acc);border-color:var(--acc);color:var(--card)}
+.cnt{flex:none;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums;min-width:40px;text-align:center}
+.amt{display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px}
+.amt small{font-size:12.5px;font-weight:700}
+.sum .amt{align-items:flex-start}
 footer{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);padding-top:14px}
 footer p{margin:0 0 6px}
 </style>
@@ -224,7 +238,7 @@ var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1
 function mr(tb){for(var i=0;i<BR.length;i++)if(+tb<=BR[i][0])return BR[i][1]*100}
 function prog(tb){if(tb<=0)return 0;for(var i=0;i<BR.length;i++)if(tb<=BR[i][0])return tb*BR[i][1]-BR[i][2]}
 function rentRate(P){var a=+P.inc;return P.type=="wage"?(a<=5500?.17:a<=8000?.15:0):(a<=4500?.17:a<=7000?.15:0)}
-function sign(x){var a=Math.abs(x);return x>0.5?'<strong class="good">−'+fmt(a)+'</strong>':x<-0.5?'<strong class="bad">+'+fmt(a)+'</strong>':'<strong class="flat">변화 없음</strong>'}
+function sign(x,lab){lab=lab||["세금을 덜 내요","세금을 더 내요"];var a=fmt(Math.abs(x));return x>0.5?'<span class="amt"><strong class="good">'+a+'</strong><small class="good">'+lab[0]+'</small></span>':x<-0.5?'<span class="amt"><strong class="bad">'+a+'</strong><small class="bad">'+lab[1]+'</small></span>':'<strong class="flat">변화 없음</strong>'}
 function psign(x){return x>0.5?'<strong class="good">+'+fmt(x)+'</strong>':x<-0.5?'<strong class="bad">−'+fmt(-x)+'</strong>':'<strong class="flat">변화 없음</strong>'}
 function go(s,t){return ' <a href="#p-'+s+'" data-sec="'+s+'"'+(t!=null?' data-sub="'+t+'"':'')+'>입력하기</a>'}
 function verdict(r){return r.ok?'<span class="y">공제</span>':'<span class="n">제외</span> ('+r.w.join(", ")+')'}
@@ -324,7 +338,7 @@ why:"배달라이더 등 영세 인적용역 사업자의 원천징수 부담을
 f:[{k:"fr",l:"연 인적용역 수입금액 (만원)",ph:"예: 3000"}],
 need:function(P,i){return i.fr===""?"연 수입금액을 입력해 주세요.":""},
 amt:function(P,i,p){var a=+i.fr*W*p.r;return{v:-a,t:fmt(a)}},
-ml:"미리 내는 세금 감소",note:"최종 세액이 줄어드는 것이 아니라 선납분이 줄어드는 효과라 통합 계산에는 넣지 않았어요."},
+ml:"미리 떼는 세금 변화",lab:["미리 떼는 세금이 줄어요","미리 떼는 세금이 늘어요"],note:"최종 세액이 줄어드는 것이 아니라 선납분이 줄어드는 효과라 통합 계산에는 넣지 않았어요."},
 {sec:"vat",title:"음식점업 의제매입세액공제 우대 공제율 기한 연장",passed:false,fin:null,
 cur:"연 매출 4억원 이하 개인 음식점 9/109 우대 공제율을 2026.12.31까지 적용 (연장이 없으면 이후 8/108)",
 gov:"우대 공제율 9/109 적용 기한을 2028.12.31까지 2년 연장",
@@ -409,7 +423,7 @@ guide:[["한눈에",'<ul><li><b>재산 합계</b>로 판정해요. 순자산이 
 ["누구 재산을 합치나",'<table><tr><th>구분</th><th>합치는 범위</th></tr><tr><td>소득요건</td><td>본인 + 배우자의 <b>총소득 합계</b></td></tr><tr><td>재산요건</td><td>본인 + 배우자 + 같은 주소에서 생계를 같이하는 직계존비속(부모·자녀 등)의 <b>재산 전부</b></td></tr></table><p>소득은 부부만, 재산은 같이 사는 가족까지 넓게 본다는 점이 다르니 주의하세요. 가구원 범위의 세부 판단은 국세청 안내로 확인해야 해요.</p>'],
 ["재산별 평가 방법",'<table><tr><th>재산</th><th>평가 기준</th></tr><tr><td>주택·토지·건물</td><td><b>시가표준액(공시가격)</b>. 실거래가가 아니에요</td></tr><tr><td>남의 집 전세금</td><td>실제 전세금과 <b>간주전세금(주택 기준시가 × 55%)</b> 중 적은 금액</td></tr><tr><td>직계존비속 집 전세</td><td>주택 기준시가 100%로 본다고 보도돼요</td></tr><tr><td>승용자동차</td><td>시가표준액 (영업용은 제외)</td></tr><tr><td>예금·적금·주식·펀드 등</td><td>기준일 현재 잔액·평가액</td></tr><tr><td>유가증권·회원권 등</td><td>기준일 현재 평가액</td></tr></table><p>국세청이 산정한 전세금이 실제보다 높으면 임대차계약서 사본을 내서 바로잡을 수 있어요.</p>'],
 ["헷갈리는 점",'<div class="ex"><b>순자산 ≠ 재산</b><br>공시가격 5억원 집에 대출 4억원 → 순자산은 1억원이지만 재산은 <b>5억원</b>이라 대상이 아니에요.</div><div class="ex"><b>공시가격 vs 실거래가</b><br>실거래가 10억원, 공시가격 7억원 아파트 → <b>7억원</b>으로 판정해요.</div><div class="ex"><b>전세금</b><br>실제 전세금 2억원, 그 집 기준시가 3억원 → 간주전세금 1.65억원 → 둘 중 적은 <b>1.65억원</b>을 재산으로 봐요.</div>'],
-["재산 계산기",'<div class="grid"><div class="fld"><label for="gh">보유 주택·토지·건물 공시가격 합계 (만원)</label><input id="gh" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gcar">승용차 시가표준액 (만원)</label><input id="gcar" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gdep">실제 전세보증금 (만원)</label><input id="gdep" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gbase">전세 사는 집의 기준시가 (만원)</label><input id="gbase" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gfin">예금·주식 등 금융재산 (만원)</label><input id="gfin" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="getc">유가증권·회원권 등 기타 (만원)</label><input id="getc" class="gin" type="number" inputmode="numeric" min="0"></div></div><label class="chk"><input type="checkbox" id="gfam" class="gin">전세 사는 집이 부모·자녀 등 직계존비속 소유예요</label><p class="sumline" id="gsum">재산 합계 0원</p><button type="button" id="gapply">이 금액을 재산 합계에 넣기</button><p class="note">가구원 전체 재산을 합쳐서 넣어 주세요. 부채는 빼지 않아요.</p>']],ml:"근로장려금 변화",pos:true,note:"점증·점감 구간은 소득요건과 최대지급액을 잇는 직선으로 계산했어요. 국세청 산정표와는 몇천 원 차이가 날 수 있어요. 재산요건(2.4억원 미만, 1.7억원 이상 50% 감액)은 현행 기준이에요. 세금이 아니라 지급액이라 통합 계산에는 넣지 않았어요."},
+["재산 계산기",'<div class="grid"><div class="fld"><label for="gh">보유 주택·토지·건물 공시가격 합계 (만원)</label><input id="gh" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gcar">승용차 시가표준액 (만원)</label><input id="gcar" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gdep">실제 전세보증금 (만원)</label><input id="gdep" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gbase">전세 사는 집의 기준시가 (만원)</label><input id="gbase" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="gfin">예금·주식 등 금융재산 (만원)</label><input id="gfin" class="gin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="getc">유가증권·회원권 등 기타 (만원)</label><input id="getc" class="gin" type="number" inputmode="numeric" min="0"></div></div><label class="chk"><input type="checkbox" id="gfam" class="gin">전세 사는 집이 부모·자녀 등 직계존비속 소유예요</label><p class="sumline" id="gsum">재산 합계 0원</p><button type="button" id="gapply">이 금액을 재산 합계에 넣기</button><p class="note">가구원 전체 재산을 합쳐서 넣어 주세요. 부채는 빼지 않아요.</p>']],ml:"근로장려금 변화",lab:["장려금을 더 받아요","장려금을 덜 받아요"],note:"점증·점감 구간은 소득요건과 최대지급액을 잇는 직선으로 계산했어요. 국세청 산정표와는 몇천 원 차이가 날 수 있어요. 재산요건(2.4억원 미만, 1.7억원 이상 50% 감액)은 현행 기준이에요. 세금이 아니라 지급액이라 통합 계산에는 넣지 않았어요."},
 {sec:"inc",title:"업무용 승용차 감가상각비 한도 조정",passed:false,fin:null,
 cur:"차종과 관계없이 감가상각비 연 800만원까지 비용 인정 (5년 정액법, 초과분은 다음 해로 이월)",
 gov:"전기·수소차 연 1,000만원으로 상향, 내연기관차 등 기타 차량 연 700만원으로 하향",
@@ -473,7 +487,7 @@ var fin=(it.passed&&it.fin)?it.fin:null,tag='<div class="tag">'+(fin?"국회 확
 res.className="res"+(fin?" fin":"");
 if(it.custom){res.innerHTML=tag+it.custom(P,i,fin);return}
 var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,e=b.v-c.v;
-res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+(it.pos?psign(e):sign(e))+'</div><p class="note">'+it.note+'</p>';
+res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e,it.lab)+'</div><p class="note">'+it.note+'</p>';
 });
 $("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b>';
 $("sum").innerHTML=SECS.map(function(s){var r=integ(P,s[0]);$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+s[1]+' 세액 효과</small><b>'+(r.e!=null?sign(r.e):'<span class="flat">입력 전</span>')+'</b></button>'}).join("");
@@ -494,6 +508,13 @@ var st=it.passed?(fin&&fin.changed?"정부안과 달라진 점: "+fin.diff:"국�
 a.innerHTML='<div class="top">'+stat+'</div><h3 class="t">'+it.title+'</h3><p class="st">'+st+'</p><div class="cmp"><div><h4>현행</h4><p>'+it.cur+'</p></div><div class="g"><h4>정부안</h4><p>'+it.gov+'</p></div><div class="f'+(fin?" on":"")+'"><h4>국회 확정안</h4><p>'+(fin?fin.text:"본회의 통과 후 표시돼요")+'</p></div></div><p class="why"><b>개정 취지</b> '+it.why+'</p><p class="meta">적용 시기: '+it.when+'</p>'+(it.guide?'<details class="guide"><summary>요건 자세히 보기</summary><div class="gt" role="tablist">'+it.guide.map(function(g,k){return '<button type="button" role="tab" data-g="'+ix+'-'+k+'" aria-selected="'+(k?"false":"true")+'">'+g[0]+'</button>'}).join("")+'</div>'+it.guide.map(function(g,k){return '<div class="gp" id="gp'+ix+'-'+k+'"'+(k?' hidden':'')+'>'+g[1]+'</div>'}).join("")+'</details>':'')+'<div class="sim">'+fh+'<div class="res" id="r'+ix+'" aria-live="polite"></div></div>';
 document.querySelector("#sec-"+it.sec+" .cards").appendChild(a)});
 document.addEventListener("input",run);document.addEventListener("change",run);
+SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards"),cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
+ nav.innerHTML='<button type="button" class="arr" aria-label="이전 항목">‹</button><div class="chips">'+Array.prototype.map.call(cards,function(c,k){return '<button type="button" data-k="'+k+'">'+c.querySelector("h3").textContent+'</button>'}).join("")+'</div><span class="cnt"></span><button type="button" class="arr" aria-label="다음 항목">›</button>';
+ box.before(nav);var arr=nav.querySelectorAll(".arr"),chips=nav.querySelectorAll(".chips button"),cur=0;
+ function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollTo({left:cards[k].offsetLeft-box.offsetLeft,behavior:"smooth"})}
+ function mark(k){cur=k;nav.querySelector(".cnt").textContent=(k+1)+" / "+n;arr[0].disabled=k==0;arr[1].disabled=k==n-1;chips.forEach(function(c,j){c.setAttribute("aria-current",j==k?"true":"false");if(j==k){var cc=c.parentNode;cc.scrollLeft=c.offsetLeft-cc.offsetLeft-(cc.clientWidth-c.offsetWidth)/2}})}
+ arr[0].onclick=function(){to(cur-1)};arr[1].onclick=function(){to(cur+1)};chips.forEach(function(c){c.onclick=function(){to(+c.dataset.k)}});
+ var tm;box.addEventListener("scroll",function(){clearTimeout(tm);tm=setTimeout(function(){var w=box.clientWidth+16;mark(Math.round(box.scrollLeft/w))},60)});mark(0)});
 $("addDep").onclick=function(){addDep();run()};
 $("demo").onclick=function(){$("ptype").value="wage";$("pinc").value=5000;$("ptb").value=3500;$("deps").innerHTML="";
 addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:23,kind:"pay",amt:600});addDep({rel:"spouse",age:"",kind:"pay",amt:700});
