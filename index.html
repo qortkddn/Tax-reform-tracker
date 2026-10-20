@@ -128,6 +128,12 @@ section>.cards>.card{flex:0 0 100%;scroll-snap-align:start;margin:0}
 .amt{display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px}
 .amt small{font-size:12.5px;font-weight:700}
 .sum .amt{align-items:flex-start}
+.ct{display:flex;gap:4px;margin:0 0 14px;background:var(--bg);border-radius:8px;padding:4px}
+.ct button{flex:1;border:none;background:none;border-radius:6px;padding:8px 6px;font-size:13.5px;color:var(--sub)}
+.ct button[aria-selected="true"]{background:var(--card);color:var(--acc);box-shadow:0 0 0 1px var(--line)}
+.cp .sim{border-top:none;padding-top:0}
+.cp.guide{border:1px solid var(--line);border-radius:6px}
+.cp .why{margin:0;font-size:14.5px;line-height:1.7}
 footer{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);padding-top:14px}
 footer p{margin:0 0 6px}
 </style>
@@ -503,7 +509,7 @@ var fh=it.f.map(function(f){var id="f"+ix+f.k;if(f.t=="sel")return '<div class="
 var fin=it.passed&&it.fin;
 var stat=it.passed?'<span class="pill ok">본회의 통과</span> '+(fin&&fin.changed?'<span class="pill">정부안에서 수정됨</span>':'<span class="pill ok">정부안 그대로 통과</span>'):'<span class="pill">본회의 미통과</span>';
 var st=it.passed?(fin&&fin.changed?"정부안과 달라진 점: "+fin.diff:"국회 심의에서 정부안이 바뀌지 않았어요."):"본회의 의결은 12월 예정이에요. 통과 후 정부안 대비 달라진 내용이 여기에 표시돼요.";
-a.innerHTML='<div class="top">'+stat+'</div><h3 class="t">'+it.title+'</h3><p class="st">'+st+'</p><div class="cmp"><div><h4>현행</h4><p>'+it.cur+'</p></div><div class="g"><h4>정부안</h4><p>'+it.gov+'</p></div><div class="f'+(fin?" on":"")+'"><h4>국회 확정안</h4><p>'+(fin?fin.text:"본회의 통과 후 표시돼요")+'</p></div></div><p class="why"><b>개정 취지</b> '+it.why+'</p><p class="meta">적용 시기: '+it.when+'</p>'+(it.guide?'<details class="guide"><summary>요건 자세히 보기</summary><div class="gt" role="tablist">'+it.guide.map(function(g,k){return '<button type="button" role="tab" data-g="'+ix+'-'+k+'" aria-selected="'+(k?"false":"true")+'">'+g[0]+'</button>'}).join("")+'</div>'+it.guide.map(function(g,k){return '<div class="gp" id="gp'+ix+'-'+k+'"'+(k?' hidden':'')+'>'+g[1]+'</div>'}).join("")+'</details>':'')+'<div class="sim">'+fh+'<div class="res" id="r'+ix+'" aria-live="polite"></div></div>';
+a.innerHTML='<div class="top">'+stat+'</div><h3 class="t">'+it.title+'</h3><p class="st">'+st+'</p><div class="cmp"><div><h4>현행</h4><p>'+it.cur+'</p></div><div class="g"><h4>정부안</h4><p>'+it.gov+'</p></div><div class="f'+(fin?" on":"")+'"><h4>국회 확정안</h4><p>'+(fin?fin.text:"본회의 통과 후 표시돼요")+'</p></div></div><p class="meta">적용 시기: '+it.when+'</p><div class="ct" role="tablist"><button type="button" role="tab" data-c="'+ix+'-0" aria-selected="true">계산하기</button>'+(it.guide?'<button type="button" role="tab" data-c="'+ix+'-1" aria-selected="false">요건 알아보기</button>':'')+'<button type="button" role="tab" data-c="'+ix+'-2" aria-selected="false">개정 취지</button></div><div class="cp" id="cp'+ix+'-0"><div class="sim">'+fh+'<div class="res" id="r'+ix+'" aria-live="polite"></div></div></div>'+(it.guide?'<div class="cp guide" id="cp'+ix+'-1" hidden><div class="gt" role="tablist">'+it.guide.map(function(g,k){return '<button type="button" role="tab" data-g="'+ix+'-'+k+'" aria-selected="'+(k?"false":"true")+'">'+g[0]+'</button>'}).join("")+'</div>'+it.guide.map(function(g,k){return '<div class="gp" id="gp'+ix+'-'+k+'"'+(k?' hidden':'')+'>'+g[1]+'</div>'}).join("")+'</div>':'')+'<div class="cp" id="cp'+ix+'-2" hidden><p class="why">'+it.why+'</p></div>';
 document.querySelector("#sec-"+it.sec+" .cards").appendChild(a)});
 document.addEventListener("input",run);document.addEventListener("change",run);
 SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards"),cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
@@ -520,6 +526,7 @@ $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin")
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("csell").value=200000;$("cbuy").value=80000;$("cexp").value=3000;$("cy").value="2028";$("chold").value=12;$("clive").value=6;$("ccnt").value="1";$("creg").value="y";$("cadj").checked=true;$("c1h").checked=true;$("csen").checked=true;
 var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="one";$("f11kind").value="eco";$("f12ok").checked=true;run()};
+document.addEventListener("click",function(e){var c=e.target.closest("[data-c]");if(!c)return;var q=c.dataset.c.split("-");c.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===c?"true":"false")});[0,1,2].forEach(function(k){var el=$("cp"+q[0]+"-"+k);if(el)el.hidden=k!=q[1]})});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
 function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v("gbase"),fam=$("gfam").checked,d=dep?(base?(fam?base:Math.min(dep,base*.55)):dep):0,t=v("gh")+v("gcar")+v("gfin")+v("getc")+d;$("gsum").innerHTML="재산 합계 "+man(t)+(dep&&base?" (전세금 "+man(d)+(fam?", 기준시가 100%":dep>base*.55?", 간주전세금 적용":", 실제 전세금 적용")+")":"");return t}
 document.addEventListener("input",function(e){if(e.target.classList.contains("gin"))gsum()});document.addEventListener("change",function(e){if(e.target.classList.contains("gin"))gsum()});
