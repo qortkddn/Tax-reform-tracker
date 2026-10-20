@@ -519,10 +519,13 @@ document.addEventListener("input",run);document.addEventListener("change",run);
 SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards"),cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
  nav.innerHTML='<button type="button" class="arr" aria-label="이전 항목">‹</button><div class="chips">'+Array.prototype.map.call(cards,function(c,k){return '<button type="button" data-k="'+k+'">'+c.querySelector("h3").textContent+'</button>'}).join("")+'</div><span class="cnt"></span><button type="button" class="arr" aria-label="다음 항목">›</button>';
  box.before(nav);var arr=nav.querySelectorAll(".arr"),chips=nav.querySelectorAll(".chips button"),cur=0;
- function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollTo({left:cards[k].offsetLeft-box.offsetLeft,behavior:"smooth"})}
- function mark(k){cur=k;nav.querySelector(".cnt").textContent=(k+1)+" / "+n;arr[0].disabled=k==0;arr[1].disabled=k==n-1;chips.forEach(function(c,j){c.setAttribute("aria-current",j==k?"true":"false");if(j==k){var cc=c.parentNode;cc.scrollLeft=c.offsetLeft-cc.offsetLeft-(cc.clientWidth-c.offsetWidth)/2}})}
+ function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollBy({left:cards[k].getBoundingClientRect().left-box.getBoundingClientRect().left,behavior:"smooth"});mark(k)}
+ function mark(k){k=Math.max(0,Math.min(n-1,k));cur=k;nav.querySelector(".cnt").textContent=(k+1)+" / "+n;arr[0].disabled=k==0;arr[1].disabled=k==n-1;chips.forEach(function(c,j){c.setAttribute("aria-current",j==k?"true":"false");if(j==k){var cc=c.parentNode;cc.scrollLeft=c.offsetLeft-cc.offsetLeft-(cc.clientWidth-c.offsetWidth)/2}})}
  arr[0].onclick=function(){to(cur-1)};arr[1].onclick=function(){to(cur+1)};chips.forEach(function(c){c.onclick=function(){to(+c.dataset.k)}});
- var tm;box.addEventListener("scroll",function(){clearTimeout(tm);tm=setTimeout(function(){var w=box.clientWidth+16;mark(Math.round(box.scrollLeft/w))},60)});mark(0)});
+ function nearest(){var best=0,bd=1e9,L=box.getBoundingClientRect().left;Array.prototype.forEach.call(cards,function(c,j){var d=Math.abs(c.getBoundingClientRect().left-L);if(d<bd){bd=d;best=j}});return best}
+ var tm;box.addEventListener("scroll",function(){clearTimeout(tm);tm=setTimeout(function(){mark(nearest())},80)});
+ if("onscrollend" in window)box.addEventListener("scrollend",function(){mark(nearest())});
+ window.addEventListener("resize",function(){to(cur)});mark(0)});
 $("addDep").onclick=function(){addDep();run()};
 $("demo").onclick=function(){$("ptype").value="wage";$("pinc").value=5000;$("ptb").value=3500;$("deps").innerHTML="";
 addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:23,kind:"pay",amt:600});addDep({rel:"spouse",age:"",kind:"pay",amt:700});
