@@ -114,7 +114,7 @@ details.guide[open]>summary::before{content:"▾ ";}
 .gp th{color:var(--sub);font-weight:600}
 .gp .ex{background:var(--bg);border-radius:6px;padding:8px 10px;margin:0 0 8px}
 .gp .sumline{font-weight:700;margin:8px 0}
-section>.cards{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 22px}
+section>.cards{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;overflow-y:hidden;transition:height .2s;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 0 22px}
 section>.cards::-webkit-scrollbar{display:none}
 section>.cards>.card{flex:0 0 100%;scroll-snap-align:start;margin:0}
 .cnav{display:flex;align-items:center;gap:8px;margin:0 0 10px}
@@ -138,6 +138,17 @@ section>.cards>.card{flex:0 0 100%;scroll-snap-align:start;margin:0}
 .dec b{color:var(--ink)}
 .dec.done{border-left-color:var(--ok);background:var(--okbg)}
 .dec.done b{color:var(--ok)}
+.kicker{margin:0 0 2px;font-size:13px;color:var(--sub)}
+.kicker b{color:var(--acc)}
+.kicker span{font-size:12px}
+.cta{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--acc);border-radius:8px;padding:18px 16px;margin:8px 0 24px}
+.cta h2{font-size:18px;margin:0 0 6px}
+.cta p{margin:0 0 12px;color:var(--sub);font-size:14px}
+.cta button{background:var(--acc);border-color:var(--acc);color:#fff;padding:10px 16px;font-size:15px}
+.cta .ctanote{margin:10px 0 0;font-size:13px}
+.brand{margin:0 0 10px;font-size:14px;color:var(--ink)}
+.brand b{color:var(--acc);font-size:15px;margin-right:4px}
+.brand small{display:block;font-size:12px;color:var(--sub);margin-top:2px}
 footer{font-size:12.5px;color:var(--sub);border-top:1px solid var(--line);padding-top:14px}
 footer p{margin:0 0 6px}
 </style>
@@ -148,6 +159,7 @@ footer p{margin:0 0 6px}
 <nav class="sec" aria-label="세목"><div role="tablist" id="secTabs"></div></nav>
 </div>
 <main>
+<p class="kicker"><b>백 회계법인</b> 세무자문본부 · 개정세법 시뮬레이터 <span>(가상 법인 · 데모)</span></p>
 <h1>2026 세제개편안 트래커</h1>
 <p class="lead">정부안이 본회의를 통과했는지, 정부안과 비교해 어떻게 바뀌었는지, 그리고 내 세금이 얼마나 달라지는지 세목별로 확인해요.</p>
 <p class="stat" id="stat"></p>
@@ -228,7 +240,14 @@ footer p{margin:0 0 6px}
 <div class="cards"></div>
 </section>
 
+<section class="cta" aria-labelledby="ctaH">
+<h2 id="ctaH">정확한 판단은 전문가 상담으로</h2>
+<p>이 계산은 정부안과 입력값을 바탕으로 한 참고용 추정치예요. 공제 요건, 중과 배제, 감면 한도처럼 개인 상황에 따라 결과가 달라질 수 있어요. 실제 신고나 절세 계획은 세무 전문가와 상담하세요.</p>
+<button type="button" id="ctaBtn">세무 상담 문의하기</button>
+<p class="ctanote" id="ctaNote" hidden>포트폴리오용 데모라 실제 상담 접수는 되지 않아요.</p>
+</section>
 <footer>
+<div class="brand"><b>백 회계법인</b> 세무자문본부<small>가상의 법인명이에요 · 회계법인 입사 준비용 포트폴리오 데모</small></div>
 <p>출처: 재정경제부 「2026년 세제개편안」(2026.8.3), 농림축산식품부 보도자료(8.9), 머니투데이방송(8.3), 데일리팜(8.4), KB Think(8.7, 8.24), 포비스 마자르(양도소득세 개편안), 택스넷(일시적 2주택), 뉴스핌(다주택 중과, 8.3), 뉴시스(고령자 이주 감면, 8.6). 정부안 확정(9.1) 이후 국회 본회의 의결은 12월 예정으로 알려져 있어요.</p>
 <p>상태 확인일 2026.10.19. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
 <p>계산 결과는 정부안과 입력값에 따른 참고용 추정치이며 세무 자문이 아니에요. 부양가족 중복공제, 의제매입세액 공제한도, 증빙 요건, 중과 배제 주택·등록임대 특례, 양도세 감면 한도는 반영하지 않았어요.</p>
@@ -520,12 +539,15 @@ SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards"),
  nav.innerHTML='<button type="button" class="arr" aria-label="이전 항목">‹</button><div class="chips">'+Array.prototype.map.call(cards,function(c,k){return '<button type="button" data-k="'+k+'">'+c.querySelector("h3").textContent+'</button>'}).join("")+'</div><span class="cnt"></span><button type="button" class="arr" aria-label="다음 항목">›</button>';
  box.before(nav);var arr=nav.querySelectorAll(".arr"),chips=nav.querySelectorAll(".chips button"),cur=0;
  function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollBy({left:cards[k].getBoundingClientRect().left-box.getBoundingClientRect().left,behavior:"smooth"});mark(k)}
- function mark(k){k=Math.max(0,Math.min(n-1,k));cur=k;nav.querySelector(".cnt").textContent=(k+1)+" / "+n;arr[0].disabled=k==0;arr[1].disabled=k==n-1;chips.forEach(function(c,j){c.setAttribute("aria-current",j==k?"true":"false");if(j==k){var cc=c.parentNode;cc.scrollLeft=c.offsetLeft-cc.offsetLeft-(cc.clientWidth-c.offsetWidth)/2}})}
+ function fit(){box.style.height=cards[cur].offsetHeight+"px"}
+ if(window.ResizeObserver){var ro=new ResizeObserver(function(){fit()});Array.prototype.forEach.call(cards,function(c){ro.observe(c)})}
+ function mark(k){k=Math.max(0,Math.min(n-1,k));cur=k;fit();nav.querySelector(".cnt").textContent=(k+1)+" / "+n;arr[0].disabled=k==0;arr[1].disabled=k==n-1;chips.forEach(function(c,j){c.setAttribute("aria-current",j==k?"true":"false");if(j==k){var cc=c.parentNode;cc.scrollLeft=c.offsetLeft-cc.offsetLeft-(cc.clientWidth-c.offsetWidth)/2}})}
  arr[0].onclick=function(){to(cur-1)};arr[1].onclick=function(){to(cur+1)};chips.forEach(function(c){c.onclick=function(){to(+c.dataset.k)}});
  function nearest(){var best=0,bd=1e9,L=box.getBoundingClientRect().left;Array.prototype.forEach.call(cards,function(c,j){var d=Math.abs(c.getBoundingClientRect().left-L);if(d<bd){bd=d;best=j}});return best}
  var tm;box.addEventListener("scroll",function(){clearTimeout(tm);tm=setTimeout(function(){mark(nearest())},80)});
  if("onscrollend" in window)box.addEventListener("scrollend",function(){mark(nearest())});
  window.addEventListener("resize",function(){to(cur)});mark(0)});
+$("ctaBtn").onclick=function(){$("ctaNote").hidden=false};
 $("addDep").onclick=function(){addDep();run()};
 $("demo").onclick=function(){$("ptype").value="wage";$("pinc").value=5000;$("ptb").value=3500;$("deps").innerHTML="";
 addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:23,kind:"pay",amt:600});addDep({rel:"spouse",age:"",kind:"pay",amt:700});
