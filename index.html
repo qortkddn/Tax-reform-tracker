@@ -180,7 +180,7 @@ footer p{margin:0 0 6px}
 <p class="stat" id="stat"></p>
 <div class="sum" id="sum"></div>
 <div class="btns"><button type="button" id="demo">예시 값 채우기 (전 세목)</button></div>
-<p class="hint">모두 2027년 기준이에요. 내 집 한 채는 2027년 보유세, 양도세는 2027년에 판다고 가정한 금액이에요. 2028년 이후 단계적으로 바뀌는 내용은 각 탭에서 따로 표시돼요. 칸을 누르면 해당 탭으로 이동해요.</p>
+<p class="hint">모두 2027년 기준이에요. 내 집 보유세는 2027년분, 부동산 양도세는 2027년에 판다고 가정한 금액이에요. 2028년 이후 단계적으로 바뀌는 내용은 각 탭에서 따로 표시돼요. 칸을 누르면 해당 탭으로 이동해요.</p>
 </section>
 
 <section id="sec-home" hidden>
@@ -203,6 +203,14 @@ footer p{margin:0 0 6px}
 <label class="chk"><input type="checkbox" id="hadj">이 집이 조정대상지역에 있어요</label>
 <label class="chk"><input type="checkbox" id="hfirst">생애 처음으로 사는 집이에요</label>
 <label class="chk"><input type="checkbox" id="hbig">전용면적 85㎡를 넘어요</label>
+<details class="guide"><summary>팔 때 추가 정보 (양도세)</summary><div class="gp">
+<div class="grid">
+<div class="fld"><label for="hexp">취득세 외 필요경비 (만원)</label><input id="hexp" type="number" inputmode="numeric" min="0" placeholder="중개수수료·자본적 지출 등"></div>
+<div class="fld"><label for="hreg">등기 여부</label><select id="hreg"><option value="y">등기</option><option value="n">미등기</option></select></div>
+</div>
+<label class="chk"><input type="checkbox" id="hone" checked>1세대 1주택 비과세 요건을 갖췄어요 (2년 이상 보유, 조정대상지역 취득분은 2년 거주)</label>
+<label class="chk"><input type="checkbox" id="hsen">만 65세 이상이고, 이 수도권 주택을 판 뒤 비수도권으로 이주해요</label>
+</div></details>
 </div>
 <div class="integ" id="ig-home"></div>
 <div class="cards"></div>
@@ -261,24 +269,10 @@ footer p{margin:0 0 6px}
 
 <section id="sec-cg" hidden>
 <div class="panel" id="p-cg">
-<h2>양도할 주택 정보</h2>
-<p>주택을 양도하는 경우를 계산해요. 입력값은 저장되지 않아요.</p>
-<div class="grid">
-<div class="fld"><label for="csell">양도가액 (만원)</label><input id="csell" type="number" inputmode="numeric" min="0" placeholder="예: 200000"></div>
-<div class="fld"><label for="cbuy">취득가액 (만원)</label><input id="cbuy" type="number" inputmode="numeric" min="0" placeholder="예: 80000"></div>
-<div class="fld"><label for="cexp">필요경비 (만원)</label><input id="cexp" type="number" inputmode="numeric" min="0" placeholder="취득세·중개수수료 등"></div>
-<div class="fld"><label for="cy">양도 예정 연도</label><select id="cy"><option value="2027">2027년</option><option value="2028">2028년</option><option value="2029">2029년 이후</option></select></div>
-<div class="fld"><label for="chold">보유기간 (년)</label><input id="chold" type="number" inputmode="numeric" min="0" step="any" placeholder="양도일 기준"></div>
-<div class="fld"><label for="clive">거주기간 (년)</label><input id="clive" type="number" inputmode="numeric" min="0" step="any" placeholder="거주 안 했으면 0"></div>
-<div class="fld"><label for="ccnt">양도일 현재 세대 보유 주택 수</label><select id="ccnt"><option value="1">1주택</option><option value="2">2주택</option><option value="3">3주택 이상</option></select></div>
-<div class="fld"><label for="creg">등기 여부</label><select id="creg"><option value="y">등기</option><option value="n">미등기</option></select></div>
+<h2>양도소득세 (주택 외)</h2>
+<p>주식, 토지·상가처럼 주택이 아닌 자산의 양도세 개정 항목이 들어갈 자리예요. 주택·부동산 양도세는 '내 집 한 채' 탭에서 함께 계산해요.</p>
+<p class="need">아직 추가된 항목이 없어요.</p>
 </div>
-<label class="chk"><input type="checkbox" id="cadj">양도하는 주택이 조정대상지역에 있어요</label>
-<label class="chk"><input type="checkbox" id="c1h">1세대 1주택 비과세 요건을 충족해요 (2년 이상 보유, 조정대상지역에서 취득했다면 2년 이상 거주)</label>
-<label class="chk"><input type="checkbox" id="csen">만 65세 이상이고, 이 수도권 주택을 판 뒤 비수도권으로 이주해요</label>
-<p class="hint">미등기 양도는 70% 단일세율이고 장기보유특별공제·기본공제·비과세·감면이 모두 배제돼요. 보유 1년 미만은 70%, 2년 미만은 60% 단기세율이 적용돼요. 1세대 1주택은 양도가액 12억원 이하면 비과세이고, 넘으면 초과분 비율만큼만 과세돼요.</p>
-</div>
-<div class="integ" id="ig-cg"></div>
 <div class="cards"></div>
 </section>
 
@@ -300,7 +294,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세법"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세 (그 외)"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -363,7 +357,7 @@ function comp(h,year,gov){if(h.cnt!="1")return compMulti(h,year,gov);var pub=+h.
  if(gov)cred=Math.min(cred,yr<=2027?800:600);var fin=after-cred;return{ded:ded,fmr:fmr,tb:tb,calc:calc,pd:pd,cr:cr,cred:cred,tax:fin,nong:fin*.2,tot:fin*1.2}}
 function holdYears(h){var a=[];for(var y=2027;y<=+h.y;y++)a.push(y);return a}
 function hold(h,gov){var t=0;holdYears(h).forEach(function(y){t+=prop(+h.pub,h.cnt=="1").tot+comp(h,y,gov).tot});return t}
-function sale(h,gov){var Y=+h.y>=2029?"2029":h.y,a=acq(h,gov),P={c:{sell:h.sell,buy:h.buy,exp:a.tot,y:Y,hold:h.hold,live:h.live,cnt:h.cnt,reg:"y",adj:h.adj,one:h.cnt=="1",sen:false}};return cgCalc(P,gov?GOV:CUR)}
+function sale(h,gov){var Y=+h.y>=2029?"2029":h.y,a=acq(h,gov),P={c:{sell:h.sell,buy:h.buy,exp:a.tot+(+$("hexp").value||0),y:Y,hold:h.hold,live:h.live,cnt:h.cnt,reg:$("hreg").value,adj:h.adj,one:h.cnt=="1"&&$("hone").checked,sen:$("hsen").checked}};return cgCalc(P,gov?GOV:CUR)}
 /* ── 근로장려금·업무용 승용차·육아휴직 ── */
 var EITC={single:[400,900,2200,165,2600,180,900],one:[700,1400,3200,285,3700,310,1400],two:[800,1700,4400,330,5200,360,1800]};
 function eitcRaw(t,inc,gov){var e=EITC[t],a=e[0],b=gov?e[6]:e[1],c=gov?e[4]:e[2],m=gov?e[5]:e[3];if(inc<=0||inc>=c)return[0,"대상 아님 (소득요건)"];if(inc<a)return[inc*m/a,"점증구간"];if(inc<=b)return[m,"평탄구간 (최대)"];return[m-(inc-b)*m/(c-b),"점감구간"]}
@@ -399,7 +393,7 @@ function cgCalc(P,s,Yo){var b=cgB(P),Y=Yo||P.c.y,o={gain:b.gain,exempt:false,tx:
  o.calc=m[0];o.lab=m[1];
  if(s.sr=="gov"&&b.one&&b.sen&&b.r>=5&&(Y=="2027"||Y=="2028")){o.red=o.calc*(Y=="2027"?.5:.3);o.nong=o.red*.2}
  o.tax=(o.calc-o.red)*1.1+o.nong;return o}
-function cgNeed(P){var c=P.c;return(c.sell===""||c.buy===""||c.hold===""||c.live==="")?"양도가액, 취득가액, 보유·거주기간을 입력해 주세요."+go("cg"):""}
+function cgNeed(P){return hNeed(H())}
 function cgAmt(P,i,p){var o=cgCalc(P,p);return{v:-o.tax*W,t:man(o.tax)}}
 function addY(d,n){var x=new Date(d.getTime());x.setFullYear(x.getFullYear()+n);return x}
 function ymd(d){return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0")}
@@ -453,7 +447,7 @@ need:function(P,i){return i.pay===""?"연 결제금액을 입력해 주세요.":
 amt:function(P,i,p){var v=card(P,p.g);return{v:v,t:cardOK(P).ok?fmt(v):"대상 아님"}},
 detail:function(P){var r=cardOK(P);return '<li>'+(r.ok?'<span class="y">요건 충족</span> · 개인사업자, 대상 업종, 직전연도 공급가액 10억원 이하':'<span class="n">공제 대상 아님</span>: '+r.w.join(", ")+go("vat"))+'</li>'},
 ml:"세액공제 변화",note:"현행 1.3%는 2026.12.31 일몰 예정이라, 개정안이 통과되지 않을 때 적용되는 공제율은 별도 확인이 필요해요. 납부세액 한도는 위 통합 계산에 반영돼요."},
-{sec:"cg",title:"장기보유특별공제 → 장기거주소득공제 전환",passed:false,fin:null,
+{sec:"home",title:"팔 때: 장기보유특별공제 → 장기거주소득공제",passed:false,fin:null,
 cur:"1세대 1주택: 보유 연 4% + 거주 연 4% (각 최대 40%, 합계 최대 80%). 공제액 상한 없음",
 gov:"주택은 '장기거주소득공제'로 개편. 2027년까지 현행 유지 → 2028년 보유 연 2% + 거주 연 6% → 2029년부터 거주 연 8%만 인정. 공제액 상한 신설 (2028년 20억원, 2029년 이후 10억원)",
 pc:CUR,pg:only("lt","Y"),
@@ -466,8 +460,8 @@ guide:[["1세대 판정",'<ul><li><b>1세대</b> = 본인과 배우자, 같은 �
 ["가액 기준",'<table><tr><th>세법</th><th>평가 기준</th></tr><tr><td><b>양도소득세</b></td><td><b>실지거래가액</b> (실제 사고판 가격)</td></tr><tr><td>근로장려금 재산</td><td>공시가격 (시가표준액)</td></tr><tr><td>종합부동산세</td><td>공시가격 × 공정시장가액비율</td></tr></table><p>그래서 <b>12억원 비과세 기준</b>은 공시가격이 아니라 실제 양도가액으로 판단해요. 공시가격 8억원이어도 13억원에 팔면 고가주택이에요.</p>'],
 ["기간 계산",'<ul><li><b>보유기간</b>: 취득일(잔금일과 등기접수일 중 빠른 날)부터 양도일까지예요.</li><li><b>거주기간</b>: 주민등록과 실제 거주가 모두 있어야 인정돼요.</li><li>비과세는 2년 이상 보유가 필요하고, 2017.8.3 이후 조정대상지역에서 취득했다면 2년 거주도 필요해요.</li><li>장기보유특별공제 우대(보유+거주 공제)도 거주 2년 이상이어야 해요. 미달이면 일반 공제(연 2%)예요.</li></ul>'],
 ["등기·미등기",'<ul><li>취득하고 <b>등기하지 않은 채</b> 팔면 미등기 양도예요.</li><li>세율 70% 단일세율이 적용되고, 장기보유특별공제·기본공제·비과세·감면이 모두 배제돼요.</li><li>장기할부 취득이나 법령상 등기가 불가능한 경우처럼 예외로 인정되는 경우도 있어요.</li></ul>'],
-["필요경비 계산기",'<div class="grid"><div class="fld"><label for="ce1">취득세 등 취득 부대비용 (만원)</label><input id="ce1" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce2">중개수수료 (취득·양도) (만원)</label><input id="ce2" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce3">법무사·세무사 비용 (만원)</label><input id="ce3" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce4">자본적 지출 (만원)</label><input id="ce4" class="cin" type="number" inputmode="numeric" min="0" placeholder="샷시·확장·보일러 교체 등"></div></div><p class="note">도배·장판·싱크대 교체 같은 <b>수익적 지출</b>은 넣지 않아요. 적격증빙이 있어야 인정돼요.</p><p class="sumline" id="cesum">필요경비 합계 0원</p><button type="button" id="ceapply">이 금액을 필요경비에 넣기</button>']],phase:[["2027","현행 유지 (보유 4% + 거주 4%)"],["2028","보유 2% + 거주 6%, 공제액 상한 20억원"],["2029~","거주 8%만 인정, 공제액 상한 10억원"]],decree:{src:"소득세법 및 시행령 개정",what:"거주기간으로 인정하는 예외 사유(취학·근무·질병 등)의 구체적 범위와 경과조치",text:null},ml:"양도소득세 변화 (지방소득세 포함)",note:"정부안의 연수별 최대 공제율과 경과조치가 확인되지 않아 보유·거주를 각각 10년까지 인정한다고 가정했어요. 거주 2년 미만은 일반 공제(보유 연 2%, 최대 30%)를 적용했어요."},
-{sec:"cg",title:"1주택자 양도소득 기본공제 상향",passed:false,fin:null,
+["필요경비 계산기",'<div class="grid"><div class="fld"><label for="ce1">취득세 등 취득 부대비용 (만원)</label><input id="ce1" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce2">중개수수료 (취득·양도) (만원)</label><input id="ce2" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce3">법무사·세무사 비용 (만원)</label><input id="ce3" class="cin" type="number" inputmode="numeric" min="0"></div><div class="fld"><label for="ce4">자본적 지출 (만원)</label><input id="ce4" class="cin" type="number" inputmode="numeric" min="0" placeholder="샷시·확장·보일러 교체 등"></div></div><p class="note">도배·장판·싱크대 교체 같은 <b>수익적 지출</b>은 넣지 않아요. 적격증빙이 있어야 인정돼요.</p><p class="sumline" id="cesum">필요경비 합계 0원</p><button type="button" id="ceapply">이 금액을 필요경비에 넣기</button><p class="note">취득세는 자동으로 필요경비에 들어가니 여기서는 빼고 넣어 주세요.</p>']],phase:[["2027","현행 유지 (보유 4% + 거주 4%)"],["2028","보유 2% + 거주 6%, 공제액 상한 20억원"],["2029~","거주 8%만 인정, 공제액 상한 10억원"]],decree:{src:"소득세법 및 시행령 개정",what:"거주기간으로 인정하는 예외 사유(취학·근무·질병 등)의 구체적 범위와 경과조치",text:null},ml:"양도소득세 변화 (지방소득세 포함)",note:"정부안의 연수별 최대 공제율과 경과조치가 확인되지 않아 보유·거주를 각각 10년까지 인정한다고 가정했어요. 거주 2년 미만은 일반 공제(보유 연 2%, 최대 30%)를 적용했어요."},
+{sec:"home",title:"팔 때: 1주택자 양도소득 기본공제 상향",passed:false,fin:null,
 cur:"양도소득 기본공제 연 250만원",
 gov:"10년 이상 거주한 1세대 1주택자(양도가액 30억원 이하)는 연 2,500만원",
 pc:CUR,pg:only("bd","gov"),
@@ -475,7 +469,7 @@ why:"장기간 실거주한 1주택자의 거래 부담을 덜어주려는 취�
 need:cgNeed,amt:cgAmt,
 detail:function(P){var b=cgB(P),w=[];if(!b.reg)return '<li><span class="n">해당 없음</span>: 미등기 양도는 기본공제가 배제돼요</li>';if(b.one&&b.s<=120000)return '<li><span class="y">비과세</span> · 양도가액 12억원 이하</li>';if(!b.one)w.push("1세대 1주택 아님");if(b.r<10)w.push("거주 10년 미만");if(b.s>300000)w.push("양도가액 30억원 초과");return '<li>'+(w.length?'<span class="n">상향 대상 아님</span>: '+w.join(", "):'<span class="y">상향 대상</span> · 거주 10년 이상, 양도가액 30억원 이하')+'</li>'},
 ml:"양도소득세 변화 (지방소득세 포함)",note:"적용 시기가 확인되지 않아 선택한 양도 연도에 적용된다고 가정했어요."},
-{sec:"cg",title:"다주택자 양도세 중과 한시 완화",passed:false,fin:null,
+{sec:"home",title:"팔 때: 다주택자 양도세 중과 한시 완화",passed:false,fin:null,
 cur:"조정대상지역 주택 양도 시 기본세율에 2주택 +20%p, 3주택 이상 +30%p 가산 (최고 65%·75%, 지방소득세 제외). 2026.5.10부터 중과 재개, 장기보유특별공제 배제",
 gov:"2년 이상 보유한 주택에 한해 가산세율을 2027년 +5%p / +10%p, 2028년 +10%p / +15%p로 낮추고 2029년부터 현행 복귀. 2026.5.10 이후 양도분에도 소급 적용",
 pc:CUR,pg:only("hv","gov"),
@@ -486,14 +480,14 @@ detail:function(P){var b=cgB(P);if(!b.reg)return '<li><span class="n">해당 없
 guide:[["중과 대상",'<ul><li>양도하는 주택이 <b>조정대상지역</b>에 있고, 양도일 현재 세대가 2주택 이상일 때만 중과돼요.</li><li>중과 대상이면 장기보유특별공제를 받을 수 없어요.</li><li>보유 2년 미만이면 단기세율(1년 미만 70%, 2년 미만 60%)과 비교해 큰 세액을 내요.</li></ul>'],
 ["중과 주택 수",'<ul><li>조합원입주권과 2021년 이후 취득한 분양권도 주택 수에 포함돼요.</li><li>일부 주택은 중과 주택 수에서 빠지는데, 세부 기준은 본회의 통과안과 시행령이 나오면 정리할게요.</li></ul>'],
 ["중과 배제",'<p>요건을 갖춘 장기임대주택, 상속주택(일정 기간), 일시적 2주택의 종전주택 등은 중과에서 빠져요. 이 트래커는 중과 배제 주택을 반영하지 않으니, 해당되면 실제 세액은 더 낮을 수 있어요.</p>']],phase:[["2027","가산세율 +5%p (2주택) / +10%p (3주택 이상)"],["2028","+10%p / +15%p"],["2029~","현행 복귀 (+20%p / +30%p)"]],decree:{src:"소득세법 시행령 제167조의3·제167조의10",what:"중과 주택 수 산정 기준과 중과 배제 주택의 세부 요건",text:null},ml:"양도소득세 변화 (지방소득세 포함)",note:"완화 기간에도 장기보유특별공제는 배제된다고 가정했어요. 2026년 양도분 소급 적용과 중과 배제 주택은 반영하지 않았어요."},
-{sec:"cg",title:"고령자 비수도권 이주 양도세 감면 신설",passed:false,fin:null,
+{sec:"home",title:"팔 때: 고령자 비수도권 이주 감면 신설",passed:false,fin:null,
 cur:"해당 특례 없음",
 gov:"만 65세 이상 1세대 1주택자가 5년 이상 거주한 수도권 주택을 팔고 비수도권으로 이주하면 양도세 감면: 2027년 양도 50%, 2028년 양도 30%",
 pc:CUR,pg:only("sr","gov"),
 why:"고령층의 비수도권 이주를 돕고 수도권 주택 매물을 늘리려는 취지예요.",when:"2027~2028년 양도분 (한시)",f:[],
 need:cgNeed,amt:cgAmt,
 detail:function(P){var b=cgB(P),w=[];if(!b.reg)w.push("미등기 양도");if(!b.one)w.push("1세대 1주택 아님");if(!b.sen)w.push("나이·이주 요건");if(b.r<5)w.push("거주 5년 미만");if(P.c.y=="2029")w.push("2029년 이후 양도 (특례 종료)");if(b.one&&b.s<=120000)return '<li><span class="y">비과세</span> · 감면 이전에 세금이 없어요</li>';
- var o=cgCalc(P,only("sr","gov"));return '<li>'+(w.length?'<span class="n">감면 대상 아님</span>: '+w.join(", ")+go("cg"):'<span class="y">감면 대상</span> · 감면세액 '+man(o.red)+', 농어촌특별세 '+man(o.nong))+'</li>'},
+ var o=cgCalc(P,only("sr","gov"));return '<li>'+(w.length?'<span class="n">감면 대상 아님</span>: '+w.join(", ")+go("home"):'<span class="y">감면 대상</span> · 감면세액 '+man(o.red)+', 농어촌특별세 '+man(o.nong))+'</li>'},
 phase:[["2027","양도세 50% 감면"],["2028","30% 감면"],["2029~","특례 종료"]],decree:{src:"조세특례제한법 시행령",what:"감면 한도, 이주 지역·기한 등 세부 요건",text:null},ml:"양도소득세 변화 (지방소득세·농특세 포함)",note:"감면 한도와 세부 요건은 확인되지 않아 반영하지 않았어요. 감면세액의 20%를 농어촌특별세로 계산했어요 (일반적인 조특법 감면 기준이며, 이 특례에 적용되는지는 확인이 필요해요)."},
 {sec:"home",title:"갈아탈 때: 일시적 2주택 처분기한 단축",passed:false,fin:null,
 cur:"새 집을 산 날부터 3년 안에 기존 집을 팔면 양도세 비과세, 취득세 중과 배제, 종부세 1주택 특례를 받아요",
@@ -562,7 +556,7 @@ function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){
 return{type:$("ptype").value,inc:$("pinc").value,tb:$("ptb").value,deps:d,
 r:{hh:$("rhh").value,house:$("rhouse").checked,move:$("rmove").checked,sin:$("rsin").checked},
 b:{form:$("bform").value,prev:$("bprev").value,net:$("bnet").value,ind:$("bind").checked},
-c:{sell:$("csell").value,buy:$("cbuy").value,exp:$("cexp").value||0,y:$("cy").value,hold:$("chold").value,live:$("clive").value,cnt:$("ccnt").value,reg:$("creg").value,adj:$("cadj").checked,one:$("c1h").checked,sen:$("csen").checked}}}
+c:(function(){var h=H(),a=acq(h,false);return{sell:h.sell,buy:h.buy,exp:(+$("hexp").value||0)+a.tot,y:+h.y>=2029?"2029":h.y,hold:h.hold,live:h.live,cnt:h.cnt,reg:$("hreg").value,adj:h.adj,one:h.cnt=="1"&&$("hone").checked,sen:$("hsen").checked}})()}}
 function addDep(o){o=o||{};var r=document.createElement("div");r.className="dep";
 r.innerHTML='<div class="row"><label>관계<select class="d-rel"><option value="spouse">배우자</option><option value="asc">직계존속 (부모 등)</option><option value="desc">직계비속 (자녀 등)</option><option value="sib">형제자매</option></select></label><label>나이<input class="d-age" type="number" inputmode="numeric" min="0" placeholder="세"></label><label>소득 기준<select class="d-kind"><option value="inc">소득금액</option><option value="pay">총급여 (근로소득만)</option></select></label><label>연 소득 (만원)<input class="d-amt" type="number" inputmode="numeric" min="0" placeholder="0"></label></div><div class="foot"><label class="chk"><input type="checkbox" class="d-live">생계를 같이함</label><label class="chk"><input type="checkbox" class="d-dis">장애인</label><button type="button" class="del">삭제</button></div>';
 if(o.rel){r.querySelector(".d-rel").value=o.rel;r.querySelector(".d-age").value=o.age;r.querySelector(".d-kind").value=o.kind;r.querySelector(".d-amt").value=o.amt;r.querySelector(".d-live").checked=!!o.live;r.querySelector(".d-dis").checked=!!o.dis}
@@ -579,7 +573,7 @@ function integ(P,sec){
   var ac=acq(h,false),ag=acq(h,true),hc=hold(h,false),hg=hold(h,true),sc=sale(h,false),sg=sale(h,true),tc=ac.tot+hc+sc.tax,tg=ag.tot+hg+sg.tax,e=(tc-tg)*W,e27=(comp(h,2027,false).tot-comp(h,2027,true).tot)*W,yrs=holdYears(h);
   var mw=function(v){return Math.round(v).toLocaleString("ko-KR")+"만원"};var rows=[["살 때 · 취득세",mw(ac.tot),mw(ag.tot)]];yrs.forEach(function(y){rows.push([y+"년 보유세"+(y>2027?" (단계 적용)":""),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,false).tot),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,true).tot)])});
   rows.push(["팔 때 · 양도세 ("+h.y+"년)",sc.exempt?"비과세":mw(sc.tax),sg.exempt?"비과세":mw(sg.tax)]);rows.push(["합계",mw(tc),mw(tg)]);
-  return{e:e,e27:e27,h:tbl(["","현행","정부안"],rows,true)+'<div class="main"><span>2027년 보유세 변화</span>'+sign(e27)+'</div><p class="sub2">'+h.y+'년에 팔 때까지 합계로는 '+(e>0.5?fmt(e)+' 덜 내요':e<-0.5?fmt(-e)+' 더 내요':'변화가 없어요')+' (2028년 이후 단계 적용분 포함)</p><p class="note">보유세는 재산세(지방교육세 포함)와 종부세(농특세 포함)의 합이에요. 공시가격은 그대로라고 가정했고, 양도 연도에도 6월 1일 기준 보유세를 낸다고 봤어요. 1주택이면 양도세 비과세 요건을 갖췄다고, 다주택이면 중과 배제 특례가 없다고 가정했어요. 종부세는 세대가 가진 모든 주택 기준이에요.</p>'}}
+  return{e:e,e27:e27,h:tbl(["","현행","정부안"],rows,true)+'<div class="main"><span>2027년 보유세 변화</span>'+sign(e27)+'</div><p class="sub2">'+h.y+'년에 팔 때까지 합계로는 '+(e>0.5?fmt(e)+' 덜 내요':e<-0.5?fmt(-e)+' 더 내요':'변화가 없어요')+' (2028년 이후 단계 적용분 포함)</p><p class="note">보유세는 재산세(지방교육세 포함)와 종부세(농특세 포함)의 합이에요. 공시가격은 그대로라고 가정했고, 양도 연도에도 6월 1일 기준 보유세를 낸다고 봤어요. 1주택 비과세 요건, 미등기 여부는 "팔 때 추가 정보"에서 바꿀 수 있어요. 다주택은 중과 배제 특례가 없다고 가정했어요. 종부세는 세대가 가진 모든 주택 기준이에요.</p>'}}
  if(sec=="inc"){if(P.tb==="")return{h:'<p class="need">현재 기준 종합소득 과세표준을 입력하면 계산돼요.'+go("inc",0)+'</p>'};
   var a=incCalc(P,false),g=incCalc(P,true),e=(a.tot-g.tot)*W,simple=0;[0,1,11,12].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});
   return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["업무용 승용차 추가 비용",man(0),man(g.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.rent),man(g.rent)],["육아휴직 복귀자 추가공제",man(a.leave),man(g.leave)],["세액공제 합계 (산출세액 한도)",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]],true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과를 단순히 더하면 세금을 '+fmt(Math.abs(simple))+(simple>=0?' 덜':' 더')+' 내는 것으로 나와서, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(a.rent+a.leave>a.cr||g.rent+g.leave>g.cr?' 세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분과 근로장려금은 세액이 아니라 제외했어요.</p>'}}
@@ -608,7 +602,7 @@ var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,
 res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e,it.lab)+'</div><p class="note">'+it.note+'</p>';
 });
 var dec=ITEMS.filter(function(it){return it.decree&&!it.decree.text}).length;$("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b> · 시행령 확인 대기 <b>'+dec+'건</b>';
-$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"}).map(function(s){var r=integ(P,s[0]);$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+s[1]+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'}).join("");
+var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig-"+s[0])}).map(function(s){var r=integ(P,s[0]);if(s[0]=="home"){var hh=H();if(!hNeed(hh)){var q=(cgCalc(P,CUR,"2027").tax-cgCalc(P,GOV,"2027").tax)*W;SUMX.push('<button type="button" data-sec="home" data-top="1"><small>부동산 양도세 (2027년에 판다면)</small><b>'+sign(q)+'</b></button>')}else SUMX.push('<button type="button" data-sec="home" data-top="1"><small>부동산 양도세 (2027년에 판다면)</small><b><span class="flat">입력 전</span></b></button>')}$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+(s[0]=="home"?"내 집 보유세 (2027년)":s[1])+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'+(s[0]=="home"?SUMX.join(""):"")}).join("");
 }
 function tab(n){for(var k=0;k<3;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
 [0,1,2].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
@@ -626,8 +620,8 @@ var st=it.passed?(fin&&fin.changed?"정부안과 달라진 점: "+fin.diff:"국�
 a.innerHTML='<div class="top">'+stat+'</div><h3 class="t">'+it.title+'</h3><p class="st">'+st+'</p><div class="cmp"><div><h4>현행</h4><p>'+it.cur+'</p></div><div class="g"><h4>정부안</h4><p>'+it.gov+'</p>'+(it.phase?'<div class="ph">'+it.phase.map(function(q){return '<div class="'+(q[0]=="2027"?"now":"later")+'"><b>'+q[0]+'</b>'+q[1]+'</div>'}).join("")+'</div>':'')+'</div><div class="f'+(fin?" on":"")+'"><h4>국회 확정안</h4><p>'+(fin?fin.text:"본회의 통과 후 표시돼요")+'</p></div></div><p class="meta">적용 시기: '+it.when+'</p>'+(it.decree?(it.decree.text?'<div class="dec done"><b>시행령 확정</b> · '+it.decree.src+'<br>'+it.decree.text+'</div>':'<div class="dec"><b>시행령 개정으로 확인 예정</b> (2027년 2월 정기 개정)<br>확인할 내용: '+it.decree.what+'<br>근거: '+it.decree.src+'</div>'):'')+'<div class="ct" role="tablist"><button type="button" role="tab" data-c="'+ix+'-0" aria-selected="true">계산하기</button>'+(it.guide?'<button type="button" role="tab" data-c="'+ix+'-1" aria-selected="false">요건 알아보기</button>':'')+'<button type="button" role="tab" data-c="'+ix+'-2" aria-selected="false">개정 취지</button></div><div class="cp" id="cp'+ix+'-0"><div class="sim">'+fh+'<div class="res" id="r'+ix+'" aria-live="polite"></div></div></div>'+(it.guide?'<div class="cp guide" id="cp'+ix+'-1" hidden><div class="gt" role="tablist">'+it.guide.map(function(g,k){return '<button type="button" role="tab" data-g="'+ix+'-'+k+'" aria-selected="'+(k?"false":"true")+'">'+g[0]+'</button>'}).join("")+'</div>'+it.guide.map(function(g,k){return '<div class="gp" id="gp'+ix+'-'+k+'"'+(k?' hidden':'')+'>'+g[1]+'</div>'}).join("")+'</div>':'')+'<div class="cp" id="cp'+ix+'-2" hidden><p class="why">'+it.why+'</p></div>';
 document.querySelector("#sec-"+it.sec+" .cards").appendChild(a)});
 document.addEventListener("input",run);document.addEventListener("change",run);
-(function(){var hc=document.querySelector("#sec-home .cards");[13,14,9].forEach(function(ix){hc.appendChild($("r"+ix).closest(".card"))})})();
-SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards");if(!box)return;var cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
+(function(){var hc=document.querySelector("#sec-home .cards");[13,14,9,5,6,7,8].forEach(function(ix){hc.appendChild($("r"+ix).closest(".card"))})})();
+SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards");if(!box||!box.children.length)return;var cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
  nav.innerHTML='<button type="button" class="arr" aria-label="이전 항목">‹</button><div class="chips">'+Array.prototype.map.call(cards,function(c,k){return '<button type="button" data-k="'+k+'">'+c.querySelector("h3").textContent+'</button>'}).join("")+'</div><span class="cnt"></span><button type="button" class="arr" aria-label="다음 항목">›</button>';
  box.before(nav);var arr=nav.querySelectorAll(".arr"),chips=nav.querySelectorAll(".chips button"),cur=0;
  function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollBy({left:cards[k].getBoundingClientRect().left-box.getBoundingClientRect().left,behavior:"smooth"});mark(k)}
@@ -646,7 +640,7 @@ addDep({rel:"asc",age:65,kind:"inc",amt:200,live:true});addDep({rel:"desc",age:2
 $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin").checked=false;
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("hkind").value="house";$("hbuy").value=90000;$("hpub").value=150000;$("hsell").value=200000;$("hy").value="2029";$("hage").value=45;$("hhold").value=12;$("hlive").value=6;$("hres").checked=true;$("hfirst").checked=true;
-$("csell").value=200000;$("cbuy").value=80000;$("cexp").value=3000;$("cy").value="2028";$("chold").value=12;$("clive").value=6;$("ccnt").value="1";$("creg").value="y";$("cadj").checked=true;$("c1h").checked=true;$("csen").checked=true;
+$("hexp").value=1000;$("hreg").value="y";$("hone").checked=true;$("hsen").checked=false;
 var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="one";$("f11kind").value="eco";$("f12ok").checked=true;run()};
 document.addEventListener("click",function(e){var c=e.target.closest("[data-c]");if(!c)return;var q=c.dataset.c.split("-");c.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===c?"true":"false")});[0,1,2].forEach(function(k){var el=$("cp"+q[0]+"-"+k);if(el)el.hidden=k!=q[1]})});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
@@ -654,7 +648,7 @@ function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v(
 document.addEventListener("input",function(e){if(e.target.classList.contains("gin"))gsum()});document.addEventListener("change",function(e){if(e.target.classList.contains("gin"))gsum()});
 function cesum(){var t=["ce1","ce2","ce3","ce4"].reduce(function(a,id){return a+(+$(id).value||0)},0);$("cesum").textContent="필요경비 합계 "+man(t);return t}
 document.addEventListener("input",function(e){if(e.target.classList.contains("cin"))cesum()});
-$("ceapply").onclick=function(){$("cexp").value=Math.round(cesum());run()};
+$("ceapply").onclick=function(){$("hexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
 var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
 run();
