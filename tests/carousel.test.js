@@ -5,7 +5,7 @@ const {chromium,devices}=require('playwright');const path=require('path');
 for(const dev of [{viewport:{width:390,height:844},hasTouch:true,isMobile:true},{viewport:{width:1280,height:900}}]){
  const p=await b.newPage(dev);const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));await p.click('#demo');
- for(const s of ['vat','inc','cg']){await p.click('#st-'+s);const sec=p.locator('#sec-'+s);const n=await sec.locator('.cards > .card').count();
+ for(const s of ['home','vat','inc','cg']){await p.click('#st-'+s);const sec=p.locator('#sec-'+s);const n=await sec.locator('.cards > .card').count();
   const check=async(how,k)=>{await p.waitForTimeout(700);const r=await sec.evaluate(el=>{const box=el.querySelector('.cards'),L=box.getBoundingClientRect().left;let best=0,bd=1e9;[...box.children].forEach((c,j)=>{const d=Math.abs(c.getBoundingClientRect().left-L);if(d<bd){bd=d;best=j}});return{vis:box.children[best].querySelector('h3').textContent,chip:el.querySelector('.chips [aria-current="true"]').textContent,cnt:el.querySelector('.cnt').textContent,best,hdiff:Math.abs(box.getBoundingClientRect().height-box.children[best].getBoundingClientRect().height)}});
    const ok=r.vis===r.chip&&r.cnt===(r.best+1)+' / '+n&&(k==null||r.best===k)&&r.hdiff<=2;if(!ok){fail++;console.log('FAIL',dev.viewport.width,s,how,k,r)}};
   for(let k=1;k<n;k++){await sec.locator('.arr').nth(1).click();await check('next',k)}
