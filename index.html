@@ -25,11 +25,11 @@ h1{font-size:26px;line-height:1.3;font-weight:800;margin:4px 0 6px;letter-spacin
 .lead{color:var(--sub);margin:0 0 14px}
 .stat{font-size:13.5px;color:var(--sub);margin:0 0 10px}
 .stat b{color:var(--ink)}
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .sum button{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-weight:400}
 .sum small{display:block;color:var(--sub);font-size:12.5px;line-height:1.4}
 .sum b{font-size:18px;font-variant-numeric:tabular-nums}
-@media (max-width:520px){.sum{grid-template-columns:1fr}}
+.sum b{font-size:17px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
 .panel h2{font-size:17px;margin:0 0 4px}
 .panel>p{margin:0 0 12px;color:var(--sub);font-size:13.5px}
@@ -162,10 +162,13 @@ footer p{margin:0 0 6px}
 <main>
 <p class="kicker"><b>백 회계법인</b> 세무자문본부 · 개정세법 시뮬레이터 <span>(가상 법인 · 데모)</span></p>
 <h1>2026 세제개편안 트래커</h1>
+<section id="sec-sum" hidden>
 <p class="lead">정부안이 본회의를 통과했는지, 정부안과 비교해 어떻게 바뀌었는지, 그리고 내 세금이 얼마나 달라지는지 세목별로 확인해요.</p>
 <p class="stat" id="stat"></p>
 <div class="sum" id="sum"></div>
 <div class="btns"><button type="button" id="demo">예시 값 채우기 (전 세목)</button></div>
+<p class="hint">각 세목 칸을 누르면 해당 탭으로 이동해요.</p>
+</section>
 
 <section id="sec-home" hidden>
 <div class="panel" id="p-home">
@@ -281,7 +284,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세법"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세법"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -584,12 +587,12 @@ var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,
 res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>현행</dt><dd>'+c.t+'</dd><dt>정부안</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e,it.lab)+'</div><p class="note">'+it.note+'</p>';
 });
 var dec=ITEMS.filter(function(it){return it.decree&&!it.decree.text}).length;$("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b> · 시행령 확인 대기 <b>'+dec+'건</b>';
-$("sum").innerHTML=SECS.map(function(s){var r=integ(P,s[0]);$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+s[1]+' 세액 효과</small><b>'+(r.e!=null?sign(r.e):'<span class="flat">입력 전</span>')+'</b></button>'}).join("");
+$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"}).map(function(s){var r=integ(P,s[0]);$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+s[1]+' 세액 효과</small><b>'+(r.e!=null?sign(r.e):'<span class="flat">입력 전</span>')+'</b></button>'}).join("");
 }
 function tab(n){for(var k=0;k<3;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
 [0,1,2].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
 function showSec(s){SECS.forEach(function(x){$("sec-"+x[0]).hidden=x[0]!=s;$("st-"+x[0]).setAttribute("aria-selected",x[0]==s?"true":"false")});try{history.replaceState(null,"","#"+s)}catch(e){}}
-$("secTabs").innerHTML=SECS.map(function(x){return '<button type="button" role="tab" id="st-'+x[0]+'" aria-controls="sec-'+x[0]+'">'+x[1]+'<small>'+ITEMS.filter(function(it){return it.sec==x[0]}).length+'</small></button>'}).join("");
+$("secTabs").innerHTML=SECS.map(function(x){return '<button type="button" role="tab" id="st-'+x[0]+'" aria-controls="sec-'+x[0]+'">'+x[1]+(x[0]=="sum"?'':'<small>'+ITEMS.filter(function(it){return it.sec==x[0]}).length+'</small>')+'</button>'}).join("");
 SECS.forEach(function(x){$("st-"+x[0]).onclick=function(){showSec(x[0])}});
 document.addEventListener("click",function(e){var a=e.target.closest("[data-sec]");if(a){e.preventDefault();showSec(a.dataset.sec);if(a.dataset.sub)tab(+a.dataset.sub);(a.dataset.top?$("ig-"+a.dataset.sec):$("p-"+a.dataset.sec)).scrollIntoView({behavior:"smooth"})}});
 $("banner").textContent="정부안 · 본회의 미통과 · 확정 아님 — 본회의를 통과하면 확정안이 표시돼요";
@@ -603,7 +606,7 @@ a.innerHTML='<div class="top">'+stat+'</div><h3 class="t">'+it.title+'</h3><p cl
 document.querySelector("#sec-"+it.sec+" .cards").appendChild(a)});
 document.addEventListener("input",run);document.addEventListener("change",run);
 (function(){var hc=document.querySelector("#sec-home .cards");[13,14,9].forEach(function(ix){hc.appendChild($("r"+ix).closest(".card"))})})();
-SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards"),cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
+SECS.forEach(function(x){var sec=$("sec-"+x[0]),box=sec.querySelector(".cards");if(!box)return;var cards=box.children,n=cards.length,nav=document.createElement("div");nav.className="cnav";
  nav.innerHTML='<button type="button" class="arr" aria-label="이전 항목">‹</button><div class="chips">'+Array.prototype.map.call(cards,function(c,k){return '<button type="button" data-k="'+k+'">'+c.querySelector("h3").textContent+'</button>'}).join("")+'</div><span class="cnt"></span><button type="button" class="arr" aria-label="다음 항목">›</button>';
  box.before(nav);var arr=nav.querySelectorAll(".arr"),chips=nav.querySelectorAll(".chips button"),cur=0;
  function to(k){k=Math.max(0,Math.min(n-1,k));box.scrollBy({left:cards[k].getBoundingClientRect().left-box.getBoundingClientRect().left,behavior:"smooth"});mark(k)}
@@ -632,7 +635,7 @@ function cesum(){var t=["ce1","ce2","ce3","ce4"].reduce(function(a,id){return a+
 document.addEventListener("input",function(e){if(e.target.classList.contains("cin"))cesum()});
 $("ceapply").onclick=function(){$("cexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
-var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"home");
+var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
 run();
 </script>
 </body>
