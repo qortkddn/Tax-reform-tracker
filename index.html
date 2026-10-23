@@ -179,11 +179,11 @@ footer p{margin:0 0 6px}
 <h1>2026 세제개편안 트래커</h1>
 <section id="sec-sum" hidden>
 <p class="lead">정부안이 본회의를 통과했는지, 정부안과 비교해 어떻게 바뀌었는지, 그리고 내 세금이 얼마나 달라지는지 세목별로 확인해요.</p>
-<h2 class="sumh">2027년, 내 세금은 이렇게 달라져요</h2>
+<h2 class="sumh">개정안으로 내 세금은 이렇게 달라져요</h2>
 <p class="stat" id="stat"></p>
 <div class="sum" id="sum"></div>
 <div class="btns"><button type="button" id="demo">예시 값 채우기 (전 세목)</button></div>
-<p class="hint">모두 2027년 기준이에요. 내 집 보유세는 2027년분, 부동산 양도세는 2027년에 판다고 가정한 금액이에요. 2028년 이후 단계적으로 바뀌는 내용은 각 탭에서 따로 표시돼요. 칸을 누르면 해당 탭으로 이동해요.</p>
+<p class="hint">모두 2027년 기준이에요. 내 집 보유세는 2027년분이고, 양도세는 '내 집 한 채'에 입력한 양도 예정 연도 기준이에요. 2028년 이후 단계적으로 바뀌는 내용은 각 탭에서 따로 표시돼요. 칸을 누르면 해당 탭으로 이동해요.</p>
 </section>
 
 <section id="sec-home" hidden>
@@ -272,8 +272,8 @@ footer p{margin:0 0 6px}
 
 <section id="sec-cg" hidden>
 <div class="panel" id="p-cg">
-<h2>주식·코인 등 (주택 외 자산)</h2>
-<p>주택이 아닌 자산을 팔 때 달라지는 세금이에요. 주택 양도세는 '내 집 한 채' 탭에서 함께 계산해요.</p>
+<h2>양도소득세 (주택 외)</h2>
+<p>주식, 코인, 토지·상가처럼 주택이 아닌 자산을 팔 때 달라지는 세금이에요. 주택 양도세는 '내 집 한 채' 탭에서 함께 계산해요.</p>
 </div>
 <div class="integ" id="ig-cg" hidden></div>
 <div class="cards"></div>
@@ -297,7 +297,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","주식·코인 등"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세 (주택 외)"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -573,7 +573,7 @@ need:function(P,i){return i.sell===""?"2027년에 판 금액을 입력해 주세
 amt:function(P,i,p){if(!p.g)return{v:0,t:"과세 없음"};var c=coin(i);return{v:-c.tax*W,t:man(c.tax)}},
 pc:{g:false},pg:{g:true},
 detail:function(P,it,f,i){var c=coin(i);return '<li>취득가로 보는 금액 '+man(c.base)+' ('+c.how+')</li><li>과세 대상 이익 '+man(Math.max(c.gain-250,0))+' = 이익 '+man(c.gain)+' − 기본공제 250만원</li>'},
-ml:"2027년에 내는 코인 세금",note:"손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."}
+ml:"2027년에 내는 코인 세금",note:"법상으로는 양도소득이 아니라 기타소득으로 분리과세되지만, 자산을 팔 때 내는 세금이라 이 탭에 함께 넣었어요. 손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."}
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
@@ -627,7 +627,7 @@ var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,
 res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>'+(it.law?"2026년까지":"현행")+'</dt><dd>'+c.t+'</dd><dt>'+(it.law?"2027년부터":"정부안")+'</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e,it.lab)+'</div><p class="note">'+it.note+'</p>';
 });
 var dec=ITEMS.filter(function(it){return it.decree&&!it.decree.text}).length;$("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.filter(function(x){return !x.law}).length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b> · 시행령 확인 대기 <b>'+dec+'건</b>';
-var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig-"+s[0])}).map(function(s){var r=integ(P,s[0]);if(s[0]=="home"){var hh=H();if(!hNeed(hh)){var q=(cgCalc(P,CUR,"2027").tax-cgCalc(P,GOV,"2027").tax)*W;SUMX.push('<button type="button" data-sec="home" data-top="1"><small>부동산 양도세 (2027년에 판다면)</small><b>'+sign(q)+'</b></button>')}else SUMX.push('<button type="button" data-sec="home" data-top="1"><small>부동산 양도세 (2027년에 판다면)</small><b><span class="flat">입력 전</span></b></button>')}$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+(s[0]=="home"?"내 집 보유세 (2027년)":s[1])+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'+(s[0]=="home"?SUMX.join(""):"")}).join("");
+var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig-"+s[0])}).map(function(s){var r=integ(P,s[0]);if(s[0]=="home"){var hh=H();if(!hNeed(hh)){var q=(cgCalc(P,CUR).tax-cgCalc(P,GOV).tax)*W;SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택 · '+hh.y+'년에 팔 때)</small><b>'+sign(q)+'</b></button>')}else SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택)</small><b><span class="flat">입력 전</span></b></button>')}$("ig-"+s[0]).innerHTML='<h2>'+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+(s[0]=="home"?"내 집 보유세 (2027년)":s[1])+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'+(s[0]=="home"?SUMX.join(""):"")}).join("");
 }
 function tab(n){for(var k=0;k<3;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
 [0,1,2].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
@@ -666,7 +666,7 @@ $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin")
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("hkind").value="house";$("hbuy").value=90000;$("hpub").value=150000;$("hsell").value=200000;$("hy").value="2029";$("hage").value=45;$("hhold").value=12;$("hlive").value=6;$("hres").checked=true;$("hfirst").checked=true;
 $("hexp").value=1000;$("hreg").value="y";$("hone").checked=true;$("hsen").checked=false;
-var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;run()};
+var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1,"f15sell":5000,"f15buy":2000};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;run()};
 document.addEventListener("click",function(e){var c=e.target.closest("[data-c]");if(!c)return;var q=c.dataset.c.split("-");c.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===c?"true":"false")});[0,1,2].forEach(function(k){var el=$("cp"+q[0]+"-"+k);if(el)el.hidden=k!=q[1]})});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
 function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v("gbase"),fam=$("gfam").checked,d=dep?(base?(fam?base:Math.min(dep,base*.55)):dep):0,t=v("gh")+v("gcar")+v("gfin")+v("getc")+d;$("gsum").innerHTML="재산 합계 "+man(t)+(dep&&base?" (전세금 "+man(d)+(fam?", 기준시가 100%":dep>base*.55?", 간주전세금 적용":", 실제 전세금 적용")+")":"");return t}
