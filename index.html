@@ -270,12 +270,21 @@ footer p{margin:0 0 6px}
 <div class="cards"></div>
 </section>
 
+<section id="sec-coin" hidden>
+<div class="panel" id="p-coin">
+<h2>가상자산(코인)</h2>
+<p>코인을 팔아 번 돈은 소득세법상 기타소득이에요. 다만 근로·사업소득 같은 다른 종합소득과 합산하지 않고 따로 22%(지방소득세 포함)로 과세해요(분리과세). 신고는 다음 해 5월 종합소득세 신고 때 함께 해요.</p>
+</div>
+<div class="integ" id="ig-coin" hidden></div>
+<div class="cards"></div>
+</section>
+
 <section id="sec-cg" hidden>
 <div class="panel" id="p-cg">
 <h2>양도소득세 (주택 외)</h2>
-<p>주식, 코인, 토지·상가처럼 주택이 아닌 자산을 팔 때 달라지는 세금이에요. 주택 양도세는 '내 집 한 채' 탭에서 함께 계산해요.</p>
+<p>주식, 토지·상가처럼 주택이 아닌 자산을 팔 때 내는 양도소득세예요. 주택 양도세는 '내 집 한 채' 탭에서 함께 계산해요.</p>
+<p class="need">아직 추가된 개정 항목이 없어요.</p>
 </div>
-<div class="integ" id="ig-cg" hidden></div>
 <div class="cards"></div>
 </section>
 
@@ -297,7 +306,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["cg","양도소득세 (주택 외)"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -562,7 +571,7 @@ need:function(){return hNeed(H())},
 amt:function(P,i,p){var r=comp(H(),2028,p.g);return{v:-r.tot*W,t:man(r.tot)}},
 detail:function(){var h=H(),a=comp(h,2028,false),g=comp(h,2028,true),g7=comp(h,2027,true);return '<li>이 집 재산세(지방교육세 포함)는 연 '+man(prop(+h.pub,h.cnt=="1").tot)+'로 개편과 관계없이 같아요'+(h.cnt!="1"?' · 종부세는 다주택 기준(모든 주택 합산)으로 계산했어요':'')+'</li><li><b>2028년 기준 종부세</b><table class="yr"><tr><th></th><th>현행</th><th>정부안</th></tr><tr><td>기본공제</td><td>'+man(a.ded)+'</td><td>'+man(g.ded)+'</td></tr><tr><td>과세표준</td><td>'+man(a.tb)+'</td><td>'+man(g.tb)+'</td></tr><tr><td>세액공제율</td><td>'+a.cr+'%</td><td>'+g.cr+'%</td></tr><tr><td>종부세 (농특세 포함)</td><td>'+man(a.tot)+'</td><td>'+man(g.tot)+'</td></tr></table></li><li>2027년(중간 단계) 정부안 종부세: '+man(g7.tot)+'</li>'},
 ml:"해마다 내는 종부세 (2028년 기준)",note:"세율표·세액공제·다주택 기본공제는 8월 발표안 기준이에요 (9월 확정 때 비거주 공제 9억원 안은 철회돼 12억원 유지). 세부담 상한은 반영하지 않았고, 재산세 공정시장가액비율은 1주택 기준 43~45%로 계산했어요."},
-{sec:"cg",title:"가상자산(코인) 과세 시작",passed:false,fin:null,law:true,
+{sec:"coin",title:"가상자산(코인) 과세 시작",passed:false,fin:null,law:true,
 debate:"유예·폐지·공제 확대 법안이 국회에 계류 중이에요. 과거 세 차례 유예도 모두 연말에 결정됐어요.",
 lawNote:"과세 폐지안, 기본공제 5,000만원 상향안, 2028년 시행안이 계류 중이에요. 정부와 여당은 예정대로 시행, 야당은 폐지 입장이에요.",
 cur:"가상자산을 팔아 번 돈에 세금이 없어요",
@@ -573,7 +582,7 @@ need:function(P,i){return i.sell===""?"2027년에 판 금액을 입력해 주세
 amt:function(P,i,p){if(!p.g)return{v:0,t:"과세 없음"};var c=coin(i);return{v:-c.tax*W,t:man(c.tax)}},
 pc:{g:false},pg:{g:true},
 detail:function(P,it,f,i){var c=coin(i);return '<li>취득가로 보는 금액 '+man(c.base)+' ('+c.how+')</li><li>과세 대상 이익 '+man(Math.max(c.gain-250,0))+' = 이익 '+man(c.gain)+' − 기본공제 250만원</li>'},
-ml:"2027년에 내는 코인 세금",note:"법상으로는 양도소득이 아니라 기타소득으로 분리과세되지만, 자산을 팔 때 내는 세금이라 이 탭에 함께 넣었어요. 손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."}
+ml:"2027년에 내는 코인 세금",note:"손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."}
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
@@ -587,13 +596,13 @@ if(o.rel){r.querySelector(".d-rel").value=o.rel;r.querySelector(".d-age").value=
 r.querySelector(".del").onclick=function(){r.remove();run()};$("deps").appendChild(r)}
 function readI(ix){var o={};ITEMS[ix].f.forEach(function(f){var e=$("f"+ix+f.k);o[f.k]=f.t=="chk"?e.checked:e.value});return o}
 function tbl(head,rows,tot){return '<table class="yr"><tr>'+head.map(function(h){return '<th>'+h+'</th>'}).join("")+'</tr>'+rows.map(function(r,k){return '<tr'+(tot&&k==rows.length-1?' class="tot"':'')+'>'+r.map(function(c){return '<td>'+c+'</td>'}).join("")+'</tr>'}).join("")+'</table>'}
-var IGH={cg:"",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
-var IGP={cg:"",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
+var IGH={coin:"",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
+var IGP={coin:"",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
 vat:"의제매입세액공제로 납부세액이 줄면 신용카드 공제 한도도 함께 줄어요. 두 개정을 한 번에 반영해 최종 납부세액을 비교해요.",
 inc:"누진세율 구조라 항목별 효과를 단순히 더하면 실제와 달라요. 과세표준을 다시 구해 세율을 적용하고, 세액공제는 산출세액 한도 안에서 반영해요.",
 cg:"선택한 양도 연도에 정부안의 모든 양도세 개정을 한 번에 반영해 과세표준부터 다시 계산해요."};
 function integ(P,sec){
- if(sec=="cg"){var ci=readI(10+5),m=ITEMS[15].need(P,ci);if(m)return{h:""};var c=coin(ci);return{e:-c.tax*W,e27:-c.tax*W,h:""}}
+ if(sec=="coin"){var ci=readI(10+5),m=ITEMS[15].need(P,ci);if(m)return{h:""};var c=coin(ci);return{e:-c.tax*W,e27:-c.tax*W,h:""}}
  if(sec=="home"){var h=H(),m=hNeed(h);if(m)return{h:'<p class="need">'+m+'</p>'};
   var ac=acq(h,false),ag=acq(h,true),hc=hold(h,false),hg=hold(h,true),sc=sale(h,false),sg=sale(h,true),tc=ac.tot+hc+sc.tax,tg=ag.tot+hg+sg.tax,e=(tc-tg)*W,e27=(comp(h,2027,false).tot-comp(h,2027,true).tot)*W,yrs=holdYears(h);
   var mw=function(v){return Math.round(v).toLocaleString("ko-KR")+"만원"};var rows=[["살 때 · 취득세",mw(ac.tot),mw(ag.tot)]];yrs.forEach(function(y){rows.push([y+"년 보유세"+(y>2027?" (단계 적용)":""),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,false).tot),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,true).tot)])});
