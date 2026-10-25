@@ -640,7 +640,7 @@ var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig
 }
 function tab(n){for(var k=0;k<3;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
 [0,1,2].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
-function showSec(s){SECS.forEach(function(x){$("sec-"+x[0]).hidden=x[0]!=s;$("st-"+x[0]).setAttribute("aria-selected",x[0]==s?"true":"false")});try{history.replaceState(null,"","#"+s)}catch(e){}}
+function showSec(s){SECS.forEach(function(x){$("sec-"+x[0]).hidden=x[0]!=s;$("st-"+x[0]).setAttribute("aria-selected",x[0]==s?"true":"false")});try{history.replaceState(null,"",s=="sum"?location.pathname+location.search:"#t-"+s)}catch(e){}}
 $("secTabs").innerHTML=SECS.map(function(x){return '<button type="button" role="tab" id="st-'+x[0]+'" aria-controls="sec-'+x[0]+'">'+x[1]+(x[0]=="sum"?'':'<small>'+ITEMS.filter(function(it){return it.sec==x[0]}).length+'</small>')+'</button>'}).join("");
 SECS.forEach(function(x){$("st-"+x[0]).onclick=function(){showSec(x[0])}});
 document.addEventListener("click",function(e){var a=e.target.closest("[data-sec]");if(a){e.preventDefault();showSec(a.dataset.sec);if(a.dataset.sub)tab(+a.dataset.sub);(a.dataset.top?$("ig-"+a.dataset.sec):$("p-"+a.dataset.sec)).scrollIntoView({behavior:"smooth"})}});
@@ -684,8 +684,9 @@ function cesum(){var t=["ce1","ce2","ce3","ce4"].reduce(function(a,id){return a+
 document.addEventListener("input",function(e){if(e.target.classList.contains("cin"))cesum()});
 $("ceapply").onclick=function(){$("hexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
-var h=(location.hash||"").slice(1);showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
+var h=(location.hash||"").slice(1).replace(/^t-/,"");showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
 run();
+if("scrollRestoration" in history)history.scrollRestoration="manual";window.scrollTo(0,0);
 </script>
 </body>
 </html>
