@@ -33,6 +33,7 @@ const CASES=[
  ['주주: 같은 거래 정부안 (의제배당 종합과세)','shTax({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false},true,3500).tax',6794.7,0.01],
  ['주주: 같은 거래가 양도소득세 탭에서 빠지는 금액','shCg({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false})',2172.5,0.01],
  ['주주: 이익소각이면 지금도 배당소득 (양도세 0)','shCg({sell:"30000",buy:"10000",fin:"500",pur:"cancel",co:"sme",big:false})',0,0],
+ ['주주: 이익소각 의제배당 (Gross-up 11%, 2027년 지급분부터)','shDiv({sell:"30000",buy:"10000",fin:"500",pur:"cancel",co:"sme",big:false},true,3500)',5406.83,0.01],
  ['창업감면: 기타 비수도권 일반 중소기업 (현행 50%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},false).tot',9900,0.01],
  ['창업감면: 같은 기업 정부안 (60%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},true).tot',7920,0.01],
 ];

@@ -409,7 +409,7 @@ function suRate(t,coef,dense,gov){var cap=coef==1,k={1.1:0,1.3:1,1.5:2}[coef];
  if(t=="venture"||t=="jump")return cap?.5:[.6,.7,.8][k];if(t=="life")return cap?(dense?.5:.75):1;if(t=="youngnew")return cap?(dense?.6:.85):1;return cap?(dense?0:.25):[.5,.6,.7][k]}
 function suCalc(P,i,gov){var tb=Math.max(+P.k.tb,0),calc=ktax(tb),r=suRate(i.type,P.k.coef,i.dense,gov),red=Math.min(calc*r,50000);return{calc:calc,r:r,red:red,tot:(calc-red)*1.1}}
 /* ── 자기주식을 회사에 판 개인주주 (만원) ── */
-function finTot(F,G,B){B=Math.max(B,0);if(F<=2000)return F*.14+prog(B);var gu=Math.min(G,F-2000)*.1,gen=2000*.14+prog(B+F-2000+gu),cmp=F*.14+prog(B),cr=gen>cmp?Math.min(gu,gen-cmp):0;return Math.max(gen,cmp)-cr}
+function finTot(F,G,B){B=Math.max(B,0);if(F<=2000)return F*.14+prog(B);var gu=Math.min(G,F-2000)*.11,gen=2000*.14+prog(B+F-2000+gu),cmp=F*.14+prog(B),cr=gen>cmp?Math.min(gu,gen-cmp):0;return Math.max(gen,cmp)-cr}
 function shTax(i,gov,B){var D=Math.max(+i.sell-(+i.buy),0),O=+i.fin||0,div=function(G){return(finTot(O+D,G,B)-finTot(O,0,B))*1.1};
  if(i.pur=="cancel")return{tax:div(D),how:"배당소득 (이익소각 · Gross-up 적용)",D:D};
  if(gov)return{tax:div(0),how:"배당소득 (의제배당)",D:D};
@@ -668,7 +668,7 @@ amt:function(P,i,p){var c=kCr(),d=carDed(i,p.lim[i.kind]),b=carDed(i,800),r=kCal
 ml:"올해 법인세 변화 (지방소득세 포함)",note:"한도를 넘는 금액도 이월돼 결국 비용 처리되므로, 효과는 총액이 아니라 비용 인정 시기의 차이예요."},
 {sec:"inc",title:"회사에 주식을 팔 때: 양도소득 → 배당소득",passed:false,fin:null,
 cur:"회사가 주주에게서 자기주식을 사면, 소각 목적이면 배당소득(의제배당), 그 외 목적이면 주식 양도소득으로 과세 (양도세 10~25%)",
-gov:"취득 목적과 관계없이 배당소득(의제배당)으로 과세. 이자·배당소득이 연 2,000만원을 넘으면 다른 종합소득과 합산돼 최고 49.5%까지 올라가요. 이중과세 조정(Gross-up)은 이익소각 목적일 때만",
+gov:"취득 목적과 관계없이 배당소득(의제배당)으로 과세. 이자·배당소득이 연 2,000만원을 넘으면 다른 종합소득과 합산돼 최고 49.5%까지 올라가요. 이중과세 조정(Gross-up 11%)은 이익소각 목적일 때만",
 why:"같은 거래인데 회사가 나중에 소각하는지에 따라 과세가 달라져 예측이 어려웠어요. 법인 쪽 자기주식 개편(법인세 탭)과 맞춰 주주 쪽도 배당으로 통일하려는 취지예요.",when:"2027.1.1 이후 회사가 취득하는 분부터 (상장주식을 거래소에서 판 경우는 종전처럼 양도소득)",
 f:[{k:"sell",l:"회사에 판 금액 (만원)",ph:"예: 30000"},{k:"buy",l:"그 주식의 내 취득가액 (만원)",ph:"예: 10000"},{k:"pur",l:"회사의 취득 목적",t:"sel",o:[["other","보유·임직원 보상 등 (소각 외)"],["cancel","이익소각"]]},{k:"co",l:"회사 규모",t:"sel",o:[["sme","중소기업"],["non","중소기업 아님"]]},{k:"fin",l:"올해 다른 이자·배당소득 (만원)",ph:"없으면 0"},{k:"big",l:"이 회사의 대주주예요 (지분율·보유액 기준)",t:"chk"}],
 need:function(P,i){if(i.sell===""||i.buy==="")return"회사에 판 금액과 취득가액을 입력해 주세요.";var D=Math.max(+i.sell-(+i.buy),0);return(+i.fin||0)+D>2000&&P.tb===""?"이자·배당소득이 2,000만원을 넘어 다른 종합소득과 합산돼요. 종합소득 과세표준을 입력해 주세요."+go("inc",0):""},
