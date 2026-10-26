@@ -57,6 +57,42 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .dep .del{margin-left:auto}
 button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:8px 12px;cursor:pointer}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.qk{background:var(--card);border:2px solid var(--acc);border-radius:12px;padding:18px 16px;margin:0 0 22px}
+.qk h2{font-size:18px;margin:0 0 4px}
+.qk>p,.qk .qsub{color:var(--sub);font-size:14px;margin:0 0 12px}
+.qk .qbar{height:5px;background:var(--line);border-radius:9px;overflow:hidden;margin:2px 0 10px}
+.qk .qbar i{display:block;height:100%;background:var(--acc);border-radius:9px;transition:width .2s}
+.qk .qn{font-size:13px;color:var(--sub)}
+.qk h3{font-size:21px;line-height:1.35;margin:4px 0 4px}
+.qk .qin{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--line);margin:18px 0 6px;padding-bottom:4px}
+.qk .qin:focus-within{border-bottom-color:var(--acc)}
+.qk .qin input{flex:1;min-width:0;border:none;outline:none;background:none;font-size:30px;font-weight:700;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.qk .qin span{font-size:17px;color:var(--sub);white-space:nowrap}
+.qk .qlab{font-size:13.5px;color:var(--sub);margin:14px 0 0}
+.qk .qch{display:grid;gap:8px;margin:16px 0 4px}
+.qk .qch button,.qk .qgo,.qk .qback,.qk .qsec{font:inherit;border-radius:10px;cursor:pointer}
+.qk .qch button{text-align:left;padding:13px 14px;border:1px solid var(--line);background:var(--card);font-size:16px;color:var(--ink)}
+.qk .qch button[aria-pressed="true"]{border-color:var(--acc);background:var(--accbg);font-weight:700}
+.qk .qgo{display:block;width:100%;margin:18px 0 6px;padding:14px;border:none;background:var(--acc);color:#fff;font-size:16px;font-weight:700}
+.qk .qgo:disabled{opacity:.4;cursor:default}
+.qk .qback{display:block;margin:0 auto;border:none;background:none;color:var(--sub);padding:8px;font-size:14.5px}
+.qk .qsec{border:1px solid var(--acc);background:var(--card);color:var(--acc);padding:11px;font-weight:700;width:100%;margin-top:8px}
+.qk .qtot{font-size:15px;margin:2px 0 14px}
+.qk .qtot strong{font-size:26px}
+.qk .qitem{border-top:1px solid var(--line);padding:14px 0}
+.qk .qitem .qh{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.qk .qitem .qh b{font-size:16px;line-height:1.4}
+.qk .qitem .qv{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qk .qitem .qv.good{color:var(--ok)}.qk .qitem .qv.bad{color:var(--bad)}.qk .qitem .qv.flat{color:var(--sub)}
+.qk .qitem p{font-size:14px;color:var(--sub);margin:6px 0 6px;line-height:1.55}
+.qk .chip{display:inline-block;font-size:12.5px;color:var(--sub);background:var(--bg);border-radius:99px;padding:3px 10px}
+.qk .tl{margin:8px 0 4px;padding:0;list-style:none}
+.qk .tl li{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:8px 0 8px;position:relative}
+.qk .tl li b{color:var(--acc);font-size:16px}
+.qk .tl li span{font-size:14px;line-height:1.55;border-left:2px solid var(--line);padding-left:12px}
+.qk h4{font-size:16px;margin:18px 0 6px}
+.qk .qnote{font-size:12.5px;color:var(--sub);margin:12px 0 0}
+
 .mr{font-size:13.5px;color:var(--acc);margin:2px 0 0}
 .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--warnline);border-radius:8px;padding:18px 16px;margin:0 0 20px}
 .card.done{border-left-color:var(--ok)}
@@ -179,6 +215,7 @@ footer p{margin:0 0 6px}
 <h1>2026 세제개편 시뮬레이터</h1>
 <section id="sec-sum" hidden>
 <p class="lead">지금 세법 그대로일 때와 비교해, 세제개편으로 <b>내가 낼 세금이 얼마나 달라지는지</b> 알려주는 계산기예요.</p>
+<div class="qk" id="qk"></div>
 <h2 class="sumh">개정안으로 내 세금은 이렇게 달라져요</h2>
 <p class="stat" id="stat"></p>
 <div class="sum" id="sum"></div>
@@ -805,6 +842,79 @@ document.addEventListener("input",function(e){if(e.target.classList.contains("ci
 $("ceapply").onclick=function(){$("hexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
 var h=(location.hash||"").slice(1).replace(/^t-/,"");showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
+/* ── 간단하게 계산하기: 질문 몇 개로 내 세금 변화를 먼저 보여주고, '자세히 보기'로 세목별 탭에 값을 넘겨요 ── */
+var QA={},QI=0;
+var QS=[
+ {k:"type",q:"어떻게 일하고 계세요?",t:"ch",o:[["wage","직장인 (월급을 받아요)"],["biz","개인사업자 (사업소득이 있어요)"]]},
+ {k:"inc",q:function(){return QA.type=="biz"?"작년 사업소득금액이 얼마였나요?":"작년 총급여가 얼마였나요?"},sub:function(){return QA.type=="biz"?"매출에서 경비를 뺀 금액이에요. 대략이면 충분해요.":"세전 연봉이에요. 대략이면 충분해요."},t:"num",u:"만원",ph:"4,000"},
+ {k:"sp",q:"배우자가 있나요?",t:"ch",o:[["no","없어요"],["zero","있어요 · 소득이 없어요"],["pay","있어요 · 일해서 버는 돈이 있어요"]]},
+ {k:"spPay",q:"배우자의 작년 총급여는 얼마였나요?",sub:"세전 연봉이에요. 아르바이트도 포함해요.",t:"num",u:"만원",ph:"700",when:function(){return QA.sp=="pay"}},
+ {k:"deps",q:"함께 사는 자녀(만 20세 이하)와 부모님(만 60세 이상)은 몇 명인가요?",sub:"소득이 없는 가족만 세어 주세요. 없으면 0이에요.",t:"num",u:"명",ph:"0"},
+ {k:"rent",q:"월세를 내고 있나요? 1년 치 월세를 알려 주세요.",sub:"안 내면 0이에요. 집이 없는 세대주라고 가정해요.",t:"num",u:"만원",ph:"0"},
+ {k:"house",q:"집이 있나요?",t:"ch",o:[["0","없어요"],["1","1채 있어요"],["2","2채 이상 있어요"]]},
+ {k:"pub",q:"가진 집의 공시가격은 모두 합쳐 얼마인가요?",sub:"부동산 공시가격 알리미에서 확인할 수 있어요. 대략이면 충분해요.",t:"num",u:"만원",ph:"150,000",when:function(){return QA.house!="0"},
+  extra:[{k:"live",l:"그 집에 실제로 산 기간",u:"년",ph:"6"}]},
+ {k:"coin",q:"2027년에 코인을 팔아 벌 것 같은 돈은?",sub:"없으면 0이에요. 2027년부터 코인 이익에 세금이 생겨요.",t:"num",u:"만원",ph:"0"}
+];
+function qList(){return QS.filter(function(q){return !q.when||q.when()})}
+function qv(v){return typeof v=="function"?v():v}
+function qNum(k){return +(String(QA[k]||"0").replace(/,/g,""))||0}
+function wageDed(g){var d=g<=500?g*.7:g<=1500?350+(g-500)*.4:g<=4500?750+(g-1500)*.15:g<=10000?1200+(g-4500)*.05:1475+(g-10000)*.02;return Math.min(d,2000)}
+/* 대략 과세표준: 근로소득공제·사회보험료(연금 4.5%, 건강 약 4%)·기본공제만 반영 */
+function qTb(){var g=qNum("inc"),sp=QA.sp,spp=qNum("spPay"),nc=1+qNum("deps")+((sp=="zero"||(sp=="pay"&&spp<=500))?1:0);
+ var base=QA.type=="biz"?g:g-wageDed(g)-Math.min(g*.045,333)-g*.04;return{tb:Math.max(base-150*nc,0),nc:nc}}
+function qCalc(){var r=[],tot=0,T=qTb(),g=qNum("inc"),sp=QA.sp,spp=qNum("spPay"),rent=qNum("rent"),biz=QA.type=="biz";
+ /* 종합소득세: 기본공제 + 월세 (통합 계산) */
+ var newDep=(sp=="pay"&&spp>500&&spp<=750)?1:0,tbG=Math.max(T.tb-150*newDep,0),calcC=prog(T.tb),calcG=prog(tbG);
+ var rr=biz?(g<=4500?.17:g<=7000?.15:0):(g<=5500?.17:g<=8000?.15:0),rcC=Math.min(Math.min(rent,1000)*rr,calcC),rcG=Math.min(Math.min(rent,1200)*rr,calcG);
+ var dInc=((calcC-rcC)-(calcG-rcG))*1.1*W;
+ if(newDep){var v=(calcC-calcG)*1.1*W;r.push({t:"부양가족 기본공제 소득요건 완화",v:v,y:"2027년부터",w:"배우자 총급여 "+fmt(spp*W)+"이 새 기준(750만원 이하)에 들어와 기본공제 1명분(150만원)이 늘어요. 과세표준 약 "+fmt(T.tb*W)+" 구간의 세율이 "+mr(T.tb)+"%라 소득세와 지방소득세를 합쳐 이만큼 줄어요."})}
+ if(rent>1000&&rr){var v2=(rcG-rcC)*1.1*W;r.push({t:"월세세액공제 한도 확대",v:v2,y:"2027년부터",w:"공제받는 월세 한도가 1,000만원에서 1,200만원으로 늘어요. 월세 "+fmt(rent*W)+" 중 "+fmt((Math.min(rent,1200)-1000)*W)+"이 더 인정되고, 공제율 "+Math.round(rr*100)+"%가 적용돼요."+(rcG+0.01<Math.min(rent,1200)*rr?" 다만 내야 할 세금보다 많이 공제받을 수는 없어서 이만큼만 줄어요.":"")})}
+ else if(rent>0&&rr)r.push({t:"월세세액공제 한도 확대",v:0,y:"2027년부터",w:"한도가 1,000만원 → 1,200만원으로 늘지만, 월세가 1,000만원 이하라 지금도 다 공제받고 있어서 변화가 없어요."});
+ tot+=dInc;
+ /* 근로장려금 */
+ var hh=(sp=="pay"&&spp>=300)?"two":(sp!="no"||qNum("deps")>0)?"one":"single",ei=g+(hh=="two"?spp:0),ec=eitcRaw(hh,ei,false)[0],eg=eitcRaw(hh,ei,true)[0],de=(eg-ec)*W;
+ if(Math.abs(de)>0.5){var hn={single:"단독",one:"홑벌이",two:"맞벌이"}[hh];r.push({t:"근로장려금 확대",v:de,lab:["장려금을 더 받아요","장려금을 덜 받아요"],y:"2027년부터",w:hn+" 가구 기준으로 소득 요건과 최대 지급액이 올라가요. 부부 합산 총소득 "+fmt(ei*W)+"이면 "+(ec>0?fmt(ec*W)+"에서 ":"지금은 대상이 아니지만 ")+fmt(eg*W)+"을 받을 수 있어요. 재산이 1억 7천만원 미만이라고 가정했어요."});tot+=de}
+ /* 종부세 (2027년분) */
+ if(QA.house&&QA.house!="0"&&qNum("pub")>0){var lv=qNum("live"),h={kind:"house",pub:String(qNum("pub")),cnt:QA.house=="1"?"1":"2",other:"0",adj:false,res:lv>0,age:"45",hold:String(lv),live:String(lv),y:"2027"};
+  var cc=comp(h,2027,false).tot,cg=comp(h,2027,true).tot,dc=(cc-cg)*W;
+  r.push({t:QA.house=="1"?"종합부동산세 개편 (1주택)":"종합부동산세 개편 (다주택)",v:dc,y:"2027년분부터",w:QA.house=="1"?(cc<0.5&&cg<0.5?"공시가격이 기본공제 이하라 지금도 정부안도 종부세가 없어요.":"실거주면 기본공제가 12억원 → 14억원으로 늘지만, 과세 기준 비율(60% → 70%)과 세율이 오르고 세액공제가 보유기간에서 거주기간 기준으로 바뀌어요. 이 영향을 모두 합친 결과예요."):"다주택은 기본공제가 9억원에서 4억원(+실거주 비율만큼 최대 5억원)으로 바뀌고 과세 기준 비율이 오르면서 세금이 크게 늘 수 있어요. 실제 주택별 상황은 '내 집 한 채'에서 자세히 볼 수 있어요."});tot+=dc}
+ /* 코인 */
+ var cn=qNum("coin");if(cn>0){var ct=Math.max(cn-250,0)*.22*W;r.push({t:"가상자산(코인) 과세 시작",v:-ct,y:"2027년부터",w:ct>0?"코인으로 번 돈에서 250만원을 빼고 22%(지방소득세 포함)를 내요. 다른 소득과 합치지 않고 따로 계산해요. 국회에서 유예 여부를 논의 중이에요.":"번 돈이 250만원 이하라 세금이 없어요."});tot-=ct}
+ return{items:r,tot:tot,tb:T.tb}}
+function qTimeline(){var a=[["2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대, 근로장려금 확대가 시작돼요."+(QA.house!="0"?" 종합부동산세 개편도 이때부터예요.":"")+(qNum("coin")>0?" 코인 과세도 시작돼요.":"")]];
+ if(QA.house&&QA.house!="0"){a.push(["2028",QA.house=="1"?"1주택 양도세가 거주 기간 중심으로 바뀌기 시작해요 (보유 연 2% + 거주 연 6%). 종부세 세율표도 하나로 합쳐져요.":"다주택 양도세 중과가 2027년보다 커져요 (+10%p / +15%p). 종부세 세율표가 하나로 합쳐져요."]);
+  a.push(["2029",QA.house=="1"?"양도세 장기공제가 거주 연 8%만 남아요. 오래 갖고만 있고 살지 않은 집은 공제가 크게 줄어요.":"다주택 양도세 중과가 원래대로 (+20%p / +30%p) 돌아가요."])}
+ return a}
+function qRender(){var el=$("qk");if(!el)return;var L=qList();
+ if(QI<0){el.innerHTML='<h2>간단하게 계산하기</h2><p>질문 몇 개에만 답하면 개정안으로 내 세금이 어떻게 달라지는지 바로 보여 드려요. 1분이면 충분해요.</p><button type="button" class="qgo" data-q="start">시작하기</button>';return}
+ if(QI>=L.length){var c=qCalc(),it=c.items;
+  el.innerHTML='<h2>무엇이 바뀌나요</h2><p class="qtot">모두 합치면 '+(Math.abs(c.tot)<0.5?'<strong class="flat">변화 없음</strong>':sign(c.tot))+'</p>'+
+   (it.length?it.map(function(x){var cls=x.v>0.5?"good":x.v<-0.5?"bad":"flat",lab=x.lab||["덜 내요","더 내요"];return '<div class="qitem"><div class="qh"><b>'+x.t+'</b><span class="qv '+cls+'">'+(cls=="flat"?"변화 없음":(x.v>0?"▼ ":"▲ ")+fmt(Math.abs(x.v)))+'</span></div><p>'+x.w+'</p><span class="chip">'+x.y+'</span></div>'}).join(""):'<p class="qsub">입력하신 내용으로는 2027년에 바뀌는 세금이 없어요.</p>')+
+   '<h4>언제부터 적용되나요</h4><ul class="tl">'+qTimeline().map(function(t){return '<li><b>'+t[0]+'</b><span>'+t[1]+'</span></li>'}).join("")+'</ul>'+
+   '<button type="button" class="qgo" data-q="detail">이 값으로 자세히 보기</button><button type="button" class="qback" data-q="restart">다시 하기</button>'+
+   '<p class="qnote">▼ 덜 내요 · ▲ 더 내요. 정부안 기준이에요(국회 확정 전). 과세표준은 근로소득공제·사회보험료·기본공제만 반영해 대략 '+fmt(c.tb*W)+'으로 추정했어요. 다른 공제가 있으면 \'자세히 보기\'에서 바꿀 수 있어요.</p>';return}
+ var q=L[QI],v=QA[q.k],body;
+ if(q.t=="ch")body='<div class="qch">'+q.o.map(function(o){return '<button type="button" data-q="ch" data-v="'+o[0]+'" aria-pressed="'+(v==o[0])+'">'+o[1]+'</button>'}).join("")+'</div>';
+ else body='<label class="qin"><input id="qinp" type="text" inputmode="numeric" autocomplete="off" placeholder="'+q.ph+'" value="'+(v||"")+'"><span>'+q.u+'</span></label>'+(q.extra||[]).map(function(e){return '<p class="qlab">'+e.l+'</p><label class="qin"><input class="qex" data-k="'+e.k+'" type="text" inputmode="numeric" autocomplete="off" placeholder="'+e.ph+'" value="'+(QA[e.k]||"")+'"><span>'+e.u+'</span></label>'}).join("");
+ el.innerHTML='<div class="qbar"><i style="width:'+Math.round((QI+1)/L.length*100)+'%"></i></div><div class="qn">'+(QI+1)+' / '+L.length+'</div><h3>'+qv(q.q)+'</h3>'+(q.sub?'<p class="qsub">'+qv(q.sub)+'</p>':'')+body+
+  (q.t=="ch"?'':'<button type="button" class="qgo" data-q="next">다음</button>')+'<button type="button" class="qback" data-q="prev">이전</button>';
+ var inp=$("qinp");if(inp){inp.addEventListener("keydown",function(e){if(e.key=="Enter")qNext()})}}
+function qComma(e){var t=e.target;if(!t.matches||!t.matches("#qinp,.qex"))return;var n=t.value.replace(/[^0-9]/g,"");t.value=n?(+n).toLocaleString("ko-KR"):""}
+function qNext(){var L=qList(),q=L[QI];if(q&&q.t=="num"){var i=$("qinp");QA[q.k]=i.value===""?(q.ph.replace(/,/g,"")=="0"?"0":""):i.value.replace(/,/g,"");if(QA[q.k]===""){i.focus();return}document.querySelectorAll("#qk .qex").forEach(function(x){QA[x.dataset.k]=x.value.replace(/,/g,"")||"0"})}QI++;qRender()}
+function qFill(){var T=qTb(),biz=QA.type=="biz";$("ptype").value=biz?"biz":"wage";$("pinc").value=qNum("inc");$("ptb").value=Math.round(T.tb);$("deps").innerHTML="";
+ if(QA.sp!="no")addDep({rel:"spouse",age:"",kind:"pay",amt:QA.sp=="pay"?qNum("spPay"):0});for(var k=0;k<qNum("deps");k++)addDep({rel:"desc",age:10,kind:"inc",amt:0});
+ if(qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
+ $("f10hh").value="auto";$("f10tot").value=qNum("inc")+(QA.sp=="pay"?qNum("spPay"):0);
+ if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");$("hhold").value=qNum("live");if(QA.house!="1")$("hother").value=0}
+ if(qNum("coin")>0){$("f15sell").value=qNum("coin");$("f15buy").value=0}
+ run();showSec("inc");$("p-inc").scrollIntoView({behavior:"smooth"})}
+document.addEventListener("input",qComma);
+document.addEventListener("click",function(e){var b=e.target.closest("#qk [data-q]");if(!b)return;var a=b.dataset.q,L=qList();
+ if(a=="start"){QI=0;QA={}}else if(a=="ch"){QA[L[QI].k]=b.dataset.v;QI++}else if(a=="next"){qNext();return}else if(a=="prev"){QI=QI>0?QI-1:-1}else if(a=="restart"){QI=-1;QA={}}else if(a=="detail"){qFill();return}
+ qRender();var t=$("qk");if(t&&t.getBoundingClientRect().top<0)t.scrollIntoView({behavior:"smooth"})});
+QI=-1;qRender();
+
 run();
 if("scrollRestoration" in history)history.scrollRestoration="manual";window.scrollTo(0,0);
 </script>

@@ -39,6 +39,8 @@ const CASES=[
  ['창업감면 70%: 최저한세에 걸려 감면 일부 소멸','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,.7).tot',4800,0.01],
  ['창업감면 100%: 최저한세 제외','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,1).tot',1800,0.01],
  ['투자공제가 더 유리하면 투자공제 선택','kBest({k:{tb:"100000",size:"sme"}},0,0,9000,.25).pick=="inv"?1:0',1,0],
+ ['간단 계산: 직장인 4,000만·배우자 700만·월세 1,200만 → 기본공제+월세 통합 (산출세액 한도)','(QA={type:"wage",inc:"4000",sp:"pay",spPay:"700",deps:"1",rent:"1200",house:"0",coin:"0"},qCalc().items.slice(0,2).reduce(function(a,x){return a+x.v},0))',431750,1],
+ ['간단 계산: 같은 사람 + 1주택 15억(6년 거주) + 코인 1,000만 → 합계','(QA={type:"wage",inc:"4000",sp:"pay",spPay:"700",deps:"1",rent:"1200",house:"1",pub:"150000",live:"6",coin:"1000"},Math.round(qCalc().tot))',-350918,1],
 ];
 (async()=>{const b=await chromium.launch();const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));
