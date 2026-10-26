@@ -6,7 +6,8 @@
 """
 import json, os, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET, datetime
 
-END = "https://apis.data.go.kr/1170000/law/lawSearchList.do"
+# https는 해외(GitHub 서버)에서 연결이 안 되는 경우가 있어 http를 먼저 시도하고, 실패하면 https로 다시 시도
+ENDS = ["http://apis.data.go.kr/1170000/law/lawSearchList.do", "https://apis.data.go.kr/1170000/law/lawSearchList.do"]
 LAWS = ["소득세법", "소득세법 시행령", "법인세법", "법인세법 시행령", "조세특례제한법", "조세특례제한법 시행령",
         "부가가치세법", "종합부동산세법", "지방세법", "지방세특례제한법"]
 KEEP = ["법령명한글", "법령ID", "법령일련번호", "공포일자", "공포번호", "시행일자", "제개정구분명", "현행연혁코드"]
@@ -14,8 +15,17 @@ META = "data/law_meta.json"
 
 def search(key, name):
     q = urllib.parse.urlencode({"serviceKey": key, "target": "law", "query": name, "numOfRows": 100, "pageNo": 1})
-    with urllib.request.urlopen(f"{END}?{q}", timeout=30) as r:
-        raw = r.read().decode("utf-8")
+    raw, errs = None, []
+    for end in ENDS:
+        for t in range(2):
+            try:
+                with urllib.request.urlopen(f"{end}?{q}", timeout=60) as r:
+                    raw = r.read().decode("utf-8"); break
+            except Exception as e:
+                errs.append(f"{end.split(':')[0]} {t+1}회: {type(e).__name__} {e}")
+        if raw is not None: break
+    if raw is None:
+        sys.exit("공공데이터포털 연결 실패 (" + name + ")\n" + "\n".join(errs))
     try:
         root = ET.fromstring(raw)
     except ET.ParseError:
