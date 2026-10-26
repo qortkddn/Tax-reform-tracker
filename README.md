@@ -77,6 +77,8 @@ docs/JOURNAL.md   프로젝트 일지 (시간순)
 
 ## 테스트
 
+**법령 대조 테스트 (데이터마이닝)**: `scripts/fetch_laws.py`가 법제처 국가법령정보 Open API로 계산에 쓰는 조문(소득세법 §17·§55, 법인세법 §55, 조특법 §6·§127·§132)을 수집해 `data/laws.json`에 저장하고, `tests/law.test.js`가 조문 원문에서 세율("6퍼센트", "100분의 11")과 금액 구간("1억5천만원")을 뽑아 시뮬레이터 계산값과 대조합니다. 조문이 개정되면 테스트가 실패해 바로 알 수 있어요. `.github/workflows/laws.yml`이 매주 자동 수집합니다 (저장소 Secret `LAW_OC` 필요).
+
 커밋할 때 `index.html` 하단의 **최종 수정일**이 자동으로 오늘 날짜로 바뀝니다 (`scripts/pre-commit`, 설치: `cp scripts/pre-commit .git/hooks/pre-commit`).
 
 배포 전에 카드 넘기기(이전/다음, 항목 칩, 스와이프)에서 상단 칩·번호가 실제 카드와 맞는지 휴대폰·PC 화면으로 자동 검사합니다.

@@ -1,0 +1,19 @@
+# 매주 월요일 아침(한국 시간 7시)에 시뮬레이터가 쓰는 조문을 법제처 Open API로 다시 수집해 data/laws.json을 갱신합니다.
+# 필요: 저장소 Settings → Secrets and variables → Actions → New repository secret → 이름 LAW_OC, 값 = 법제처 Open API 인증 ID
+name: 조문 수집
+on:
+  schedule: [{cron: "0 22 * * 0"}]
+  workflow_dispatch: {}
+permissions: {contents: write}
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/fetch_laws.py
+        env: {LAW_OC: "${{ secrets.LAW_OC }}"}
+      - name: 바뀐 조문이 있으면 커밋
+        run: |
+          git config user.name "law-bot"; git config user.email "law-bot@users.noreply.github.com"
+          git add data/laws.json
+          git diff --cached --quiet || git commit -m "조문 자동 수집 $(TZ=Asia/Seoul date +%Y.%m.%d)" && git push
