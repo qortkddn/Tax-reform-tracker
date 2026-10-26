@@ -4,7 +4,8 @@
 # 2) 조문 본문 수집: 법제처 Open API (Secret: LAW_OC, 있을 때만)
 name: 법령 확인
 on:
-  schedule: [{cron: "0 22 * * 0"}]
+  # 주간 자동 실행은 잠시 꺼 둠: 공공데이터포털이 해외(GitHub 서버) 접속을 받지 않아 연결 시간 초과 (2026.10.26 확인)
+  # schedule: [{cron: "0 22 * * 0"}]
   workflow_dispatch: {}
 permissions: {contents: write}
 jobs:
