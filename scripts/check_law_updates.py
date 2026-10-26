@@ -4,10 +4,10 @@
 실행: LAW_KEY=<공공데이터포털 일반 인증키(Decoding)> python3 scripts/check_law_updates.py
 - 개정이 감지되면 data/law_changes.md에 내용을 쓰고 종료코드 2로 끝나요 (GitHub Actions에서 실패 표시 → 메일 알림).
 """
-import json, os, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET, datetime
+import json, os, sys, time, urllib.parse, urllib.request, xml.etree.ElementTree as ET, datetime
 
-# https는 해외(GitHub 서버)에서 연결이 안 되는 경우가 있어 http를 먼저 시도하고, 실패하면 https로 다시 시도
-ENDS = ["http://apis.data.go.kr/1170000/law/lawSearchList.do", "https://apis.data.go.kr/1170000/law/lawSearchList.do"]
+# 공공데이터포털은 해외 서버(GitHub Actions)의 접속을 받지 않아요. 국내에서 실행하거나, apis.data.go.kr을 허용한 Claude 작업 환경에서 실행해요 (https로 확인됨).
+ENDS = ["https://apis.data.go.kr/1170000/law/lawSearchList.do", "http://apis.data.go.kr/1170000/law/lawSearchList.do"]
 LAWS = ["소득세법", "소득세법 시행령", "법인세법", "법인세법 시행령", "조세특례제한법", "조세특례제한법 시행령",
         "부가가치세법", "종합부동산세법", "지방세법", "지방세특례제한법"]
 KEEP = ["법령명한글", "법령ID", "법령일련번호", "공포일자", "공포번호", "시행일자", "제개정구분명", "현행연혁코드"]
@@ -17,7 +17,8 @@ def search(key, name):
     q = urllib.parse.urlencode({"serviceKey": key, "target": "law", "query": name, "numOfRows": 100, "pageNo": 1})
     raw, errs = None, []
     for end in ENDS:
-        for t in range(2):
+        for t in range(4):
+            if t: time.sleep(3 * t)
             try:
                 with urllib.request.urlopen(f"{end}?{q}", timeout=60) as r:
                     raw = r.read().decode("utf-8"); break
@@ -47,6 +48,7 @@ def main():
     old = json.load(open(META, encoding="utf-8")) if os.path.exists(META) else {}
     new, changes = {}, []
     for name in LAWS:
+        time.sleep(1)  # 연속 요청으로 끊기지 않게 간격을 둠
         h = search(key, name); new[name] = h
         o = old.get(name)
         if o and (o.get("공포일자"), o.get("시행일자")) != (h.get("공포일자"), h.get("시행일자")):
