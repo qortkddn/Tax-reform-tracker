@@ -31,6 +31,8 @@ const CASES=[
  ['법인세 통합: 중소기업은 R&D 공제가 최저한세 제외','kCalc({k:{tb:"96400",size:"sme"}},0,5200,3250).tot',10558,0.01],
  ['주주: 회사에 판 주식 2억 차익 (현행 양도세 10%)','shTax({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false},false,3500).tax',2172.5,0.01],
  ['주주: 같은 거래 정부안 (의제배당 종합과세)','shTax({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false},true,3500).tax',6794.7,0.01],
+ ['주주: 같은 거래가 양도소득세 탭에서 빠지는 금액','shCg({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false})',2172.5,0.01],
+ ['주주: 이익소각이면 지금도 배당소득 (양도세 0)','shCg({sell:"30000",buy:"10000",fin:"500",pur:"cancel",co:"sme",big:false})',0,0],
  ['창업감면: 기타 비수도권 일반 중소기업 (현행 50%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},false).tot',9900,0.01],
  ['창업감면: 같은 기업 정부안 (60%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},true).tot',7920,0.01],
 ];
