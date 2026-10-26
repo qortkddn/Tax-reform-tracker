@@ -34,8 +34,11 @@ const CASES=[
  ['주주: 같은 거래가 양도소득세 탭에서 빠지는 금액','shCg({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false})',2172.5,0.01],
  ['주주: 이익소각이면 지금도 배당소득 (양도세 0)','shCg({sell:"30000",buy:"10000",fin:"500",pur:"cancel",co:"sme",big:false})',0,0],
  ['주주: 이익소각 의제배당 (Gross-up 11%, 2027년 지급분부터)','shDiv({sell:"30000",buy:"10000",fin:"500",pur:"cancel",co:"sme",big:false},true,3500)',5406.83,0.01],
- ['창업감면: 기타 비수도권 일반 중소기업 (현행 50%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},false).tot',9900,0.01],
- ['창업감면: 같은 기업 정부안 (60%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},true).tot',7920,0.01],
+ ['창업감면 vs 투자공제: 현행 50% 감면 선택이 유리','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,.5).tot',6800,0.01],
+ ['창업감면: 정부안 60%','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,.6).tot',5000,0.01],
+ ['창업감면 70%: 최저한세에 걸려 감면 일부 소멸','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,.7).tot',4800,0.01],
+ ['창업감면 100%: 최저한세 제외','kBest({k:{tb:"100000",size:"sme"}},0,4000,2500,1).tot',1800,0.01],
+ ['투자공제가 더 유리하면 투자공제 선택','kBest({k:{tb:"100000",size:"sme"}},0,0,9000,.25).pick=="inv"?1:0',1,0],
 ];
 (async()=>{const b=await chromium.launch();const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));
