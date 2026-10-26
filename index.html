@@ -270,6 +270,21 @@ footer p{margin:0 0 6px}
 <div class="cards"></div>
 </section>
 
+<section id="sec-corp" hidden>
+<div class="panel" id="p-corp">
+<h2>법인 정보</h2>
+<p>회사가 내는 법인세가 개정으로 얼마나 달라지는지 계산해요. 조세특례제한법(조특법)의 공제·감면도 결국 법인세를 줄이는 것이라 이 탭에서 함께 계산해요. 입력값은 저장되지 않아요.</p>
+<div class="grid">
+<div class="fld"><label for="kpsize">기업 규모</label><select id="kpsize"><option value="sme">중소기업</option><option value="big">중견·일반기업</option></select></div>
+<div class="fld"><label for="kptb">현행 기준 과세표준 (만원)</label><input id="kptb" type="number" inputmode="numeric" min="0" placeholder="지금 세법으로 계산한 금액, 예: 100000"></div>
+<div class="fld"><label for="kpreg">사업장 지역 (R&D·투자 공제 가중치)</label><select id="kpreg"><option value="1">수도권 (서울·경기·인천) ×1.0</option><option value="1.1">비수도권 광역시 등 ×1.1</option><option value="1.3">그 외 비수도권 ×1.3</option><option value="1.5">비수도권 우대지역 ×1.5</option></select></div>
+</div>
+<p class="hint">법인세율은 과세표준 2억원 이하 10%, 200억원 이하 20%, 3,000억원 이하 22%, 초과 25%예요 (2026년부터 적용 중인 현행 세율). 법인지방소득세는 국세의 10%로 계산했어요.</p>
+</div>
+<div class="integ" id="ig-corp"></div>
+<div class="cards"></div>
+</section>
+
 <section id="sec-coin" hidden>
 <div class="panel" id="p-coin">
 <h2>가상자산(코인)</h2>
@@ -306,7 +321,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["corp","법인세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -370,6 +385,31 @@ function comp(h,year,gov){if(h.cnt!="1")return compMulti(h,year,gov);var pub=+h.
 function holdYears(h){var a=[];for(var y=2027;y<=+h.y;y++)a.push(y);return a}
 function hold(h,gov){var t=0;holdYears(h).forEach(function(y){t+=prop(+h.pub,h.cnt=="1").tot+comp(h,y,gov).tot});return t}
 function sale(h,gov){var Y=+h.y>=2029?"2029":h.y,a=acq(h,gov),P={c:{sell:h.sell,buy:h.buy,exp:a.tot+(+$("hexp").value||0),y:Y,hold:h.hold,live:h.live,cnt:h.cnt,reg:$("hreg").value,adj:h.adj,one:h.cnt=="1"&&$("hone").checked,sen:$("hsen").checked}};return cgCalc(P,gov?GOV:CUR)}
+/* ── 법인세 (만원) ── */
+var KBR=[[20000,.10,0],[2000000,.20,2000],[30000000,.22,42000],[1e12,.25,942000]];
+function ktax(tb){if(tb<=0)return 0;for(var i=0;i<KBR.length;i++)if(tb<=KBR[i][0])return tb*KBR[i][1]-KBR[i][2]}
+function kmr(tb){for(var i=0;i<KBR.length;i++)if(tb<=KBR[i][0])return KBR[i][1]*100}
+function kmin(tb,size){if(tb<=0)return 0;if(size=="sme")return tb*.07;return tb<=1000000?tb*.1:tb<=10000000?100000+(tb-1000000)*.12:1180000+(tb-10000000)*.17}
+function corpNeed(P){return P.k.tb===""?"위 '법인 정보'에 과세표준을 입력해 주세요."+go("corp"):""}
+/* 과세표준 조정(dtb), R&D·투자 공제(rd, inv)를 받아 최저한세까지 반영한 총 부담세액 */
+function kCalc(P,dtb,rd,inv){var tb=Math.max(+P.k.tb+dtb,0),calc=ktax(tb),mt=kmin(tb,P.k.size),sme=P.k.size=="sme",S=inv+(sme?0:rd),N=sme?rd:0,Sa=Math.min(S,Math.max(calc-mt,0)),Na=Math.min(N,calc-Sa),dec=calc-Sa-Na,loc=calc*.1;
+ return{tb:tb,calc:calc,mt:mt,S:S,N:N,cr:Sa+Na,blocked:S-Sa+(N-Na),dec:dec,loc:loc,tot:dec+loc}}
+function kCr(){var i=readI(17);return{rd:+i.rd||0,inv:+i.inv||0}}
+function kAdj(gov){var t=readI(16),e=readI(18),c=readI(19),d={tr:0,ent:0,car:0};
+ if(gov){if(t.amt!=="")d.tr=t.kind=="gain"?-(+t.amt):+t.amt;d.ent=-((+e.cong||0)+(+e.etc||0));if(c.price!==""&&c.biz!=="")d.car=-(carDed(c,CAR_G[c.kind]).ok-carDed(c,800).ok)}return d}
+function kAll(P,gov){var d=kAdj(gov),c=kCr(),m=gov?P.k.coef:1;var r=kCalc(P,d.tr+d.ent+d.car,c.rd*m,c.inv*m);r.d=d;r.rd=c.rd*m;r.inv=c.inv*m;return r}
+/* ── 창업중소기업 세액감면 (조특법 §6) ── */
+function suRate(t,coef,dense,gov){var cap=coef==1,k={1.1:0,1.3:1,1.5:2}[coef];
+ if(!gov){if(t=="venture")return .5;if(t=="incub")return .5;if(t=="life"||t=="youngnew")return cap?(dense?.5:.75):1;return cap?(dense?0:.25):.5}
+ if(t=="venture"||t=="jump")return cap?.5:[.6,.7,.8][k];if(t=="life")return cap?(dense?.5:.75):1;if(t=="youngnew")return cap?(dense?.6:.85):1;return cap?(dense?0:.25):[.5,.6,.7][k]}
+function suCalc(P,i,gov){var tb=Math.max(+P.k.tb,0),calc=ktax(tb),r=suRate(i.type,P.k.coef,i.dense,gov),red=Math.min(calc*r,50000);return{calc:calc,r:r,red:red,tot:(calc-red)*1.1}}
+/* ── 자기주식을 회사에 판 개인주주 (만원) ── */
+function finTot(F,G,B){B=Math.max(B,0);if(F<=2000)return F*.14+prog(B);var gu=Math.min(G,F-2000)*.1,gen=2000*.14+prog(B+F-2000+gu),cmp=F*.14+prog(B),cr=gen>cmp?Math.min(gu,gen-cmp):0;return Math.max(gen,cmp)-cr}
+function shTax(i,gov,B){var D=Math.max(+i.sell-(+i.buy),0),O=+i.fin||0,div=function(G){return(finTot(O+D,G,B)-finTot(O,0,B))*1.1};
+ if(i.pur=="cancel")return{tax:div(D),how:"배당소득 (이익소각 · Gross-up 적용)",D:D};
+ if(gov)return{tax:div(0),how:"배당소득 (의제배당)",D:D};
+ var tb=Math.max(D-250,0),t=i.big?(tb<=30000?tb*.2:6000+(tb-30000)*.25):tb*(i.co=="sme"?.1:.2);
+ return{tax:t*1.1,how:"주식 양도소득 ("+(i.big?(tb>30000?"20~25%":"20%"):(i.co=="sme"?"10%":"20%"))+")",D:D}}
 /* ── 가상자산 (만원) ── */
 function coin(i){var sell=+i.sell,buy=i.buy===""?null:+i.buy,fmv=i.fmv===""?null:+i.fmv,cost=+i.cost||0,base,how;
  if(buy===null&&fmv===null){base=sell*.5;how="취득가를 몰라 판 금액의 50%";cost=0}else{base=Math.max(buy||0,fmv||0);how=fmv!==null&&(buy===null||fmv>buy)?"2026년 말 시가 적용":"실제 취득가 적용"}
@@ -582,12 +622,72 @@ need:function(P,i){return i.sell===""?"2027년에 판 금액을 입력해 주세
 amt:function(P,i,p){if(!p.g)return{v:0,t:"과세 없음"};var c=coin(i);return{v:-c.tax*W,t:man(c.tax)}},
 pc:{g:false},pg:{g:true},
 detail:function(P,it,f,i){var c=coin(i);return '<li>취득가로 보는 금액 '+man(c.base)+' ('+c.how+')</li><li>과세 대상 이익 '+man(Math.max(c.gain-250,0))+' = 이익 '+man(c.gain)+' − 기본공제 250만원</li>'},
-ml:"2027년에 내는 코인 세금",note:"손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."}
+ml:"2027년에 내는 코인 세금",note:"손실과 이익은 해마다 따로 봐요 (이월·통산 안 됨). 실제 취득가를 모르면 판 금액의 50%까지만 필요경비로 인정되고, 이때 부대비용은 따로 빼지 않아요."},
+{sec:"corp",title:"자기주식 처분손익 과세 제외",passed:false,fin:null,
+cur:"회사가 갖고 있던 자기주식을 팔아 생긴 이익은 법인세 과세, 손실은 비용으로 인정",
+gov:"처분이익·손실 모두 법인세 계산에서 빼요 (자본거래로 봄). 주식을 회사에 판 주주는 취득 목적과 관계없이 배당소득으로 과세돼요 — 종합소득세 탭에서 계산",
+why:"자기주식을 원칙적으로 1년 안에 소각하도록 한 2026년 3월 상법 개정에 맞춰, 자기주식 거래를 자산 매매가 아닌 자본거래로 일관되게 보려는 취지예요.",when:"2027.1.1 이후 취득·처분하는 자기주식부터 (2026년까지 취득한 자기주식은 종전 규정)",
+f:[{k:"kind",l:"처분 결과",t:"sel",o:[["gain","처분이익"],["loss","처분손실"]]},{k:"amt",l:"처분손익 금액 (만원)",ph:"예: 3000"}],
+need:function(P,i){return i.amt===""?"자기주식 처분손익을 입력해 주세요.":corpNeed(P)},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var c=kCr(),d=p.g?(i.kind=="gain"?-(+i.amt):+i.amt):0,r=kCalc(P,d,c.rd,c.inv);return{v:-r.tot*W,t:"과세표준 "+man(r.tb)+" · 법인세 "+man(r.tot)}},
+ml:"법인세 변화 (지방소득세 포함)",note:"처분손실이 있던 회사는 손실을 비용으로 못 빼게 돼 세금이 늘어요. 다른 개정은 반영하지 않은 이 항목만의 효과예요."},
+{sec:"corp",title:"조특법 · R&D·투자 세액공제 지방 우대",passed:false,fin:null,
+cur:"연구개발비 세액공제·통합투자세액공제는 지역과 관계없이 같은 공제율",
+gov:"기본공제율에 지역 계수를 곱해요: 수도권 ×1.0, 비수도권 광역시 등 ×1.1, 그 외 비수도권 ×1.3, 비수도권 우대지역 ×1.5",
+why:"수도권 집중을 줄이고 지방 투자를 늘리려는 취지예요. 세제 지원에 처음으로 지역별 계수를 도입했어요.",when:"2027.1.1 이후 발생하는 R&D 비용·투자분부터",
+decree:{src:"조특법 제10조·제24조 개정안",what:"비수도권 광역시 등과 우대지역에 해당하는 구체적인 지역 구분"},
+f:[{k:"rd",l:"현행 기준 연구개발비 세액공제액 (만원)",ph:"예: 4000"},{k:"inv",l:"현행 기준 통합투자세액공제액 (만원)",ph:"예: 2500"}],
+need:function(P,i){return i.rd===""&&i.inv===""?"현행 기준 공제액을 하나 이상 입력해 주세요.":corpNeed(P)},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var m=p.g?P.k.coef:1,r=kCalc(P,0,(+i.rd||0)*m,(+i.inv||0)*m);return{v:-r.tot*W,t:"공제 "+man(r.S+r.N)+(r.blocked>0.5?" 중 "+man(r.cr)+"만 반영 (최저한세)":"")}},
+detail:function(P,it,f,i){return '<li>지역 계수 ×'+P.k.coef+' → 공제액 '+man((+i.rd||0)+(+i.inv||0))+' → '+man(((+i.rd||0)+(+i.inv||0))*P.k.coef)+'</li><li>'+(P.k.size=="sme"?'중소기업의 R&D 공제는 최저한세 적용에서 빠지지만, 투자세액공제는 최저한세 한도에 걸릴 수 있어요':'중견·일반기업은 R&D·투자 공제 모두 최저한세 한도에 걸릴 수 있어요')+'</li>'},
+ml:"법인세 변화 (지방소득세 포함)",note:"공제율 상한과 신성장·국가전략기술 구분은 반영하지 않고 현행 공제액에 계수를 곱했어요. 최저한세로 못 받은 공제는 10년간 이월돼요. 개인사업자도 같은 조특법 공제를 받아요."},
+{sec:"corp",title:"기업업무추진비(접대비) 증빙 기준 완화",passed:false,fin:null,
+cur:"카드·세금계산서 같은 적격증빙 없이 쓴 접대비는 건당 경조사비 20만원, 그 외 3만원까지만 비용 인정",
+gov:"경조사비 건당 30만원, 그 외 5만원까지 증빙 없이 비용 인정 (시행령 개정 사항)",
+why:"물가 상승을 반영해 오래 묶여 있던 증빙 기준 금액을 현실화하려는 취지예요.",when:"시행령 시행일이 속하는 사업연도부터 (2027년 2월 정기 개정 예정)",
+f:[{k:"cong",l:"증빙 없는 경조사비 중 건당 20만원 초과 ~ 30만원 이하 합계 (만원)",ph:"예: 300"},{k:"etc",l:"증빙 없는 그 외 접대비 중 건당 3만원 초과 ~ 5만원 이하 합계 (만원)",ph:"예: 100"}],
+need:function(P,i){return i.cong===""&&i.etc===""?"해당 금액을 하나 이상 입력해 주세요.":corpNeed(P)},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var c=kCr(),d=p.g?-((+i.cong||0)+(+i.etc||0)):0,r=kCalc(P,d,c.rd,c.inv);return{v:-r.tot*W,t:(p.g?man(-d)+" 추가 비용 인정 · ":"")+"법인세 "+man(r.tot)}},
+ml:"법인세 변화 (지방소득세 포함)",note:"국회 의결이 아니라 시행령 개정이라 정부가 확정해요. 접대비 전체 한도 안에서 쓴 금액이라고 가정했어요."},
+{sec:"corp",title:"업무용 승용차 감가상각비 한도 조정 (법인)",passed:false,fin:null,
+cur:"차종과 관계없이 감가상각비 연 800만원까지 비용 인정 (초과분은 다음 해로 이월)",
+gov:"전기·수소차 연 1,000만원으로 상향, 내연기관차 등 기타 차량 연 700만원으로 하향",
+why:"친환경차 전환을 유도하려는 취지예요. 종합소득세 탭의 개인사업자 항목과 같은 개정이고, 여기서는 법인세율로 계산해요.",when:"2027.1.1 이후 새로 취득·임차하는 차량부터",
+f:[{k:"kind",l:"차종",t:"sel",o:[["ice","내연기관·하이브리드 등"],["eco","전기차·수소차"]]},{k:"price",l:"취득가액 (만원)",ph:"예: 8000"},{k:"biz",l:"업무사용비율 (%)",ph:"운행기록부 기준, 예: 100"}],
+need:function(P,i){return i.price===""||i.biz===""?"취득가액과 업무사용비율을 입력해 주세요.":corpNeed(P)},
+pc:{lim:CAR_C},pg:{lim:CAR_G},
+amt:function(P,i,p){var c=kCr(),d=carDed(i,p.lim[i.kind]),b=carDed(i,800),r=kCalc(P,-(d.ok-b.ok),c.rd,c.inv);return{v:-r.tot*W,t:"연 "+man(d.ok)+" 비용 인정"+(d.over>0?" · "+man(d.over)+" 이월":"")}},
+ml:"올해 법인세 변화 (지방소득세 포함)",note:"한도를 넘는 금액도 이월돼 결국 비용 처리되므로, 효과는 총액이 아니라 비용 인정 시기의 차이예요."},
+{sec:"inc",title:"회사에 주식을 팔 때: 양도소득 → 배당소득",passed:false,fin:null,
+cur:"회사가 주주에게서 자기주식을 사면, 소각 목적이면 배당소득(의제배당), 그 외 목적이면 주식 양도소득으로 과세 (양도세 10~25%)",
+gov:"취득 목적과 관계없이 배당소득(의제배당)으로 과세. 이자·배당소득이 연 2,000만원을 넘으면 다른 종합소득과 합산돼 최고 49.5%까지 올라가요. 이중과세 조정(Gross-up)은 이익소각 목적일 때만",
+why:"같은 거래인데 회사가 나중에 소각하는지에 따라 과세가 달라져 예측이 어려웠어요. 법인 쪽 자기주식 개편(법인세 탭)과 맞춰 주주 쪽도 배당으로 통일하려는 취지예요.",when:"2027.1.1 이후 회사가 취득하는 분부터 (상장주식을 거래소에서 판 경우는 종전처럼 양도소득)",
+f:[{k:"sell",l:"회사에 판 금액 (만원)",ph:"예: 30000"},{k:"buy",l:"그 주식의 내 취득가액 (만원)",ph:"예: 10000"},{k:"pur",l:"회사의 취득 목적",t:"sel",o:[["other","보유·임직원 보상 등 (소각 외)"],["cancel","이익소각"]]},{k:"co",l:"회사 규모",t:"sel",o:[["sme","중소기업"],["non","중소기업 아님"]]},{k:"fin",l:"올해 다른 이자·배당소득 (만원)",ph:"없으면 0"},{k:"big",l:"이 회사의 대주주예요 (지분율·보유액 기준)",t:"chk"}],
+need:function(P,i){if(i.sell===""||i.buy==="")return"회사에 판 금액과 취득가액을 입력해 주세요.";var D=Math.max(+i.sell-(+i.buy),0);return(+i.fin||0)+D>2000&&P.tb===""?"이자·배당소득이 2,000만원을 넘어 다른 종합소득과 합산돼요. 종합소득 과세표준을 입력해 주세요."+go("inc",0):""},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var r=shTax(i,p.g,+P.tb||0);return{v:-r.tax*W,t:r.how+" "+man(r.tax)}},
+detail:function(P,it,f,i){var D=Math.max(+i.sell-(+i.buy),0),F=(+i.fin||0)+D;return '<li>번 돈 '+man(D)+' = 판 금액 − 취득가액</li><li>정부안에서 이자·배당소득 합계 '+man(F)+(F>2000?' → <b>2,000만원 초과라 종합과세</b>':' → 2,000만원 이하라 15.4% 원천징수로 끝나요')+'</li>'},
+ml:"주식을 판 해의 소득세 변화 (지방소득세 포함)",note:"상장주식을 거래소에서 판 경우는 바뀌지 않아요 (시간외 대량매매 등은 정부안 적용). 다른 이자·배당소득은 Gross-up 대상이 아닌 것으로 보고, 다른 종합소득 과세표준은 '내 정보' 입력값을 써요. 비중소기업 대주주의 1년 미만 보유(30%)는 반영하지 않았어요."},
+{sec:"corp",title:"조특법 · 창업중소기업 세액감면 지방 우대",passed:false,fin:null,
+cur:"창업 후 5년간 법인세 감면 (연 5억원 한도). 감면율은 수도권 25%(과밀억제권역 0%) / 비수도권 50%, 벤처 50%, 청년·생계형 50~100%",
+gov:"비수도권을 3단계로 나눠 감면율 우대: 일반 중소기업 50·60·70%, 벤처·점프업 60·70·80%. 청년 신산업 창업 신설(수도권 60~85%, 비수도권 100%). 창업보육센터 입주기업은 수도권 감면이 줄어요(50% → 25%, 과밀 0%)",
+why:"지방 창업을 늘리고, 성장 가능성이 큰 점프업·청년 신산업 창업을 집중 지원하려는 취지예요.",when:"2027.1.1 이후 창업·지정·확인·선정되는 분부터",
+decree:{src:"조특법 제6조 개정안",what:"비수도권 광역시 등·우대지역 구분, 점프업·청년 신산업 선정 기준"},
+f:[{k:"type",l:"창업 유형",t:"sel",o:[["sme","일반 창업중소기업"],["venture","벤처기업·에너지신기술 중소기업"],["jump","점프업 중소기업 (중기부 선정)"],["life","청년 창업·생계형 창업"],["youngnew","청년 신산업 창업"],["incub","창업보육센터 입주기업"]]},{k:"dense",l:"수도권 과밀억제권역에서 창업했어요",t:"chk"}],
+need:function(P,i){return corpNeed(P)},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var r=suCalc(P,i,p.g);return{v:-r.tot*W,t:"감면율 "+Math.round(r.r*100)+"% · 감면 "+man(r.red)+" · 법인세 "+man(r.tot)}},
+detail:function(P,it,f,i){return '<li>감면 전 산출세액 '+man(ktax(+P.k.tb))+' (위 법인 정보의 과세표준 기준)</li><li>사업장 지역은 위 법인 정보에서 고른 지역을 써요</li>'},
+ml:"창업 감면 기간 연 법인세 변화 (지방소득세 포함)",note:"최저한세와 투자세액공제 중복 적용 제한은 회사 상황에 따라 판단이 필요해 반영하지 않았고, 법인세 통합 계산에도 넣지 않았어요. 개인사업자는 같은 감면율로 소득세가 감면돼요."}
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
 return{type:$("ptype").value,inc:$("pinc").value,tb:$("ptb").value,deps:d,
 r:{hh:$("rhh").value,house:$("rhouse").checked,move:$("rmove").checked,sin:$("rsin").checked},
+k:{size:$("kpsize").value,tb:$("kptb").value,coef:+$("kpreg").value},
 b:{form:$("bform").value,prev:$("bprev").value,net:$("bnet").value,ind:$("bind").checked},
 c:(function(){var h=H(),a=acq(h,false);return{sell:h.sell,buy:h.buy,exp:(+$("hexp").value||0)+a.tot,y:+h.y>=2029?"2029":h.y,hold:h.hold,live:h.live,cnt:h.cnt,reg:$("hreg").value,adj:h.adj,one:h.cnt=="1"&&$("hone").checked,sen:$("hsen").checked}})()}}
 function addDep(o){o=o||{};var r=document.createElement("div");r.className="dep";
@@ -596,8 +696,8 @@ if(o.rel){r.querySelector(".d-rel").value=o.rel;r.querySelector(".d-age").value=
 r.querySelector(".del").onclick=function(){r.remove();run()};$("deps").appendChild(r)}
 function readI(ix){var o={};ITEMS[ix].f.forEach(function(f){var e=$("f"+ix+f.k);o[f.k]=f.t=="chk"?e.checked:e.value});return o}
 function tbl(head,rows,tot){return '<table class="yr"><tr>'+head.map(function(h){return '<th>'+h+'</th>'}).join("")+'</tr>'+rows.map(function(r,k){return '<tr'+(tot&&k==rows.length-1?' class="tot"':'')+'>'+r.map(function(c){return '<td>'+c+'</td>'}).join("")+'</tr>'}).join("")+'</table>'}
-var IGH={coin:"",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
-var IGP={coin:"",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
+var IGH={coin:"",corp:"법인세 통합 계산",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
+var IGP={coin:"",corp:"과세표준 → 누진세율(10~25%) → 세액공제 → 최저한세 순서로 한 번에 계산해요. 공제가 늘어도 최저한세에 걸리면 실제로 줄어드는 세금은 그보다 적어요. 창업중소기업 감면은 최저한세·중복 적용 판단이 필요해 여기서는 뺐어요.",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
 vat:"의제매입세액공제로 납부세액이 줄면 신용카드 공제 한도도 함께 줄어요. 두 개정을 한 번에 반영해 최종 납부세액을 비교해요.",
 inc:"누진세율 구조라 항목별 효과를 단순히 더하면 실제와 달라요. 과세표준을 다시 구해 세율을 적용하고, 세액공제는 산출세액 한도 안에서 반영해요.",
 cg:"선택한 양도 연도에 정부안의 모든 양도세 개정을 한 번에 반영해 과세표준부터 다시 계산해요."};
@@ -608,9 +708,12 @@ function integ(P,sec){
   var mw=function(v){return Math.round(v).toLocaleString("ko-KR")+"만원"};var rows=[["살 때 · 취득세",mw(ac.tot),mw(ag.tot)]];yrs.forEach(function(y){rows.push([y+"년 보유세"+(y>2027?" (단계 적용)":""),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,false).tot),mw(prop(+h.pub,h.cnt=="1").tot+comp(h,y,true).tot)])});
   rows.push(["팔 때 · 양도세 ("+h.y+"년)",sc.exempt?"비과세":mw(sc.tax),sg.exempt?"비과세":mw(sg.tax)]);rows.push(["합계",mw(tc),mw(tg)]);
   return{e:e,e27:e27,h:tbl(["","현행","정부안"],rows,true)+'<div class="main"><span>2027년 보유세 변화</span>'+sign(e27)+'</div><p class="sub2">'+h.y+'년에 팔 때까지 합계로는 '+(e>0.5?fmt(e)+' 덜 내요':e<-0.5?fmt(-e)+' 더 내요':'변화가 없어요')+' (2028년 이후 단계 적용분 포함)</p><p class="note">보유세는 재산세(지방교육세 포함)와 종부세(농특세 포함)의 합이에요. 공시가격은 그대로라고 가정했고, 양도 연도에도 6월 1일 기준 보유세를 낸다고 봤어요. 1주택 비과세 요건, 미등기 여부는 "팔 때 추가 정보"에서 바꿀 수 있어요. 다주택은 중과 배제 특례가 없다고 가정했어요. 종부세는 세대가 가진 모든 주택 기준이에요.</p>'}}
+ if(sec=="corp"){var m=corpNeed(P);if(m)return{h:'<p class="need">'+m+'</p>'};
+  var a=kAll(P,false),g=kAll(P,true),e=(a.tot-g.tot)*W,simple=0;[16,17,18,19].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i))simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v});
+  return{e:e,h:tbl(["","현행","정부안"],[["자기주식 처분손익 조정",man(0),man(g.d.tr)],["접대비 추가 비용 인정",man(0),man(-g.d.ent)],["업무용 승용차 추가 비용",man(0),man(-g.d.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",kmr(a.tb)+"%",kmr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["최저한세",man(a.mt),man(g.mt)],["R&D·투자 세액공제 (계수 반영)",man(a.rd+a.inv),man(g.rd+g.inv)],["실제 받은 공제 (최저한세 반영)",man(a.cr)+(a.blocked>0.5?" ⚠":""),man(g.cr)+(g.blocked>0.5?" ⚠":"")],["결정세액",man(a.dec),man(g.dec)],["법인지방소득세 포함",man(a.tot),man(g.tot)]],true)+'<div class="main"><span>법인세 변화</span>'+sign(e)+'</div><p class="note">'+(a.blocked>0.5||g.blocked>0.5?'⚠ 최저한세에 걸려 공제를 다 받지 못했어요 (현행 '+man(a.blocked)+', 정부안 '+man(g.blocked)+', 10년간 이월). ':'')+'항목별 효과를 단순히 더하면 세금을 '+fmt(Math.abs(simple))+(simple>=0?' 덜':' 더')+' 내는 것으로 나와서, 통합 계산과 '+fmt(Math.abs(simple-e))+' 차이가 나요.</p>'}}
  if(sec=="inc"){if(P.tb==="")return{h:'<p class="need">현재 기준 종합소득 과세표준을 입력하면 계산돼요.'+go("inc",0)+'</p>'};
-  var a=incCalc(P,false),g=incCalc(P,true),e=(a.tot-g.tot)*W,simple=0;[0,1,11,12].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});
-  return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["업무용 승용차 추가 비용",man(0),man(g.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.rent),man(g.rent)],["육아휴직 복귀자 추가공제",man(a.leave),man(g.leave)],["세액공제 합계 (산출세액 한도)",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]],true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과를 단순히 더하면 세금을 '+fmt(Math.abs(simple))+(simple>=0?' 덜':' 더')+' 내는 것으로 나와서, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(a.rent+a.leave>a.cr||g.rent+g.leave>g.cr?' 세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분과 근로장려금은 세액이 아니라 제외했어요.</p>'}}
+  var a=incCalc(P,false),g=incCalc(P,true),si=readI(20),sh=!ITEMS[20].need(P,si),sc=sh?shTax(si,false,a.tb).tax:0,sg=sh?shTax(si,true,g.tb).tax:0,e=(a.tot+sc-g.tot-sg)*W,simple=0;[0,1,11,12,20].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});
+  return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["업무용 승용차 추가 비용",man(0),man(g.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.rent),man(g.rent)],["육아휴직 복귀자 추가공제",man(a.leave),man(g.leave)],["세액공제 합계 (산출세액 한도)",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]].concat(sh?[["회사에 판 주식 세금 (지방세 포함)",man(sc),man(sg)],["합계",man(a.tot+sc),man(g.tot+sg)]]:[]),true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과를 단순히 더하면 세금을 '+fmt(Math.abs(simple))+(simple>=0?' 덜':' 더')+' 내는 것으로 나와서, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(a.rent+a.leave>a.cr||g.rent+g.leave>g.cr?' 세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분과 근로장려금은 세액이 아니라 제외했어요.</p>'}}
  if(sec=="vat"){var s3=$("f3sales").value,s4=$("f4pay").value;if((s3===""||$("f3buy").value==="")&&s4==="")return{h:'<p class="need">아래 항목에 매출·매입액이나 카드 결제금액을 입력하면 계산돼요.</p>'};
   var dc=deemed(P,false).v,dg=deemed(P,true).v,cc=card(P,false),cg2=card(P,true),N=P.b.net;
   if(N===""){var e=(dg+cg2)-(dc+cc);return{e:e,h:tbl(["","현행","정부안"],[["의제매입세액공제",fmt(dc),fmt(dg)],["신용카드 매출 세액공제",fmt(cc),fmt(cg2)],["공제 합계",fmt(dc+cc),fmt(dg+cg2)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e)+'</div><p class="note">공제 전 납부세액을 넣으면 카드 공제의 납부세액 한도까지 반영해요.'+go("vat")+'</p>'}}
@@ -675,7 +778,7 @@ $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin")
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("hkind").value="house";$("hbuy").value=90000;$("hpub").value=150000;$("hsell").value=200000;$("hy").value="2029";$("hage").value=45;$("hhold").value=12;$("hlive").value=6;$("hres").checked=true;$("hfirst").checked=true;
 $("hexp").value=1000;$("hreg").value="y";$("hone").checked=true;$("hsen").checked=false;
-var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1,"f15sell":5000,"f15buy":2000};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;run()};
+var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1,"f15sell":5000,"f15buy":2000,"kptb":100000,"f16amt":3000,"f17rd":4000,"f17inv":2500,"f18cong":300,"f18etc":100,"f19price":8000,"f19biz":100,"f20sell":8000,"f20buy":3000,"f20fin":500};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;$("kpsize").value="big";$("kpreg").value="1.3";$("f16kind").value="gain";$("f19kind").value="eco";$("f20pur").value="other";$("f20co").value="sme";$("f20big").checked=false;$("f21type").value="sme";$("f21dense").checked=false;run()};
 document.addEventListener("click",function(e){var c=e.target.closest("[data-c]");if(!c)return;var q=c.dataset.c.split("-");c.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===c?"true":"false")});[0,1,2].forEach(function(k){var el=$("cp"+q[0]+"-"+k);if(el)el.hidden=k!=q[1]})});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
 function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v("gbase"),fam=$("gfam").checked,d=dep?(base?(fam?base:Math.min(dep,base*.55)):dep):0,t=v("gh")+v("gcar")+v("gfin")+v("getc")+d;$("gsum").innerHTML="재산 합계 "+man(t)+(dep&&base?" (전세금 "+man(d)+(fam?", 기준시가 100%":dep>base*.55?", 간주전세금 적용":", 실제 전세금 적용")+")":"");return t}

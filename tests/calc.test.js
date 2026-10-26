@@ -25,6 +25,14 @@ const CASES=[
  ['양도세: 미등기 70%','cgCalc(CP({reg:"n"}),CUR).tax',90090,0.01],
  ['장특공제율: 비조정 다주택 12년 보유·6년 거주 (현행)','cgCalc(CP({cnt:"2",one:false}),CUR).rate',0.24,0.0001],
  ['장특공제율: 같은 집 2028년 (정부안: 보유 1%·거주 2% 중 큰 쪽)','cgCalc(CP({cnt:"2",one:false}),only("lt","Y"),"2028").rate',0.12,0.0001],
+ ['법인세 산출세액: 과세표준 10억원','ktax(100000)',18000,0.01],
+ ['최저한세: 중견·일반 과세표준 150억원','kmin(1500000,"big")',160000,0.01],
+ ['법인세 통합: 과세표준 9.64억, 공제 8,450만원 → 최저한세에 걸림','kCalc({k:{tb:"96400",size:"big"}},0,5200,3250).tot',11368,0.01],
+ ['법인세 통합: 중소기업은 R&D 공제가 최저한세 제외','kCalc({k:{tb:"96400",size:"sme"}},0,5200,3250).tot',10558,0.01],
+ ['주주: 회사에 판 주식 2억 차익 (현행 양도세 10%)','shTax({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false},false,3500).tax',2172.5,0.01],
+ ['주주: 같은 거래 정부안 (의제배당 종합과세)','shTax({sell:"30000",buy:"10000",fin:"500",pur:"other",co:"sme",big:false},true,3500).tax',6794.7,0.01],
+ ['창업감면: 기타 비수도권 일반 중소기업 (현행 50%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},false).tot',9900,0.01],
+ ['창업감면: 같은 기업 정부안 (60%)','suCalc({k:{tb:"100000",coef:1.3}},{type:"sme",dense:false},true).tot',7920,0.01],
 ];
 (async()=>{const b=await chromium.launch();const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));
