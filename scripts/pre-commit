@@ -1,0 +1,8 @@
+#!/bin/sh
+# index.html이 커밋에 포함되면 하단 '최종 수정일'을 오늘 날짜(한국 시간)로 바꿉니다.
+# 설치: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+if git diff --cached --name-only | grep -qx 'index.html'; then
+  d=$(TZ=Asia/Seoul date +%Y.%m.%d)
+  sed -i "s#<span id=\"upd\">[0-9.]*</span>#<span id=\"upd\">$d</span>#" index.html
+  git add index.html
+fi

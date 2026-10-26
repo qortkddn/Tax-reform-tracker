@@ -77,6 +77,8 @@ docs/JOURNAL.md   프로젝트 일지 (시간순)
 
 ## 테스트
 
+커밋할 때 `index.html` 하단의 **최종 수정일**이 자동으로 오늘 날짜로 바뀝니다 (`scripts/pre-commit`, 설치: `cp scripts/pre-commit .git/hooks/pre-commit`).
+
 배포 전에 카드 넘기기(이전/다음, 항목 칩, 스와이프)에서 상단 칩·번호가 실제 카드와 맞는지 휴대폰·PC 화면으로 자동 검사합니다.
 
 ```
