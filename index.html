@@ -341,6 +341,15 @@ footer p{margin:0 0 6px}
 <div class="cards"></div>
 </section>
 
+<section id="sec-inh" hidden>
+<div class="panel" id="p-inh">
+<h2>상속·증여세</h2>
+<p>이번 개편안에서 <b>상속세율(10~50%)과 일괄공제·배우자공제 같은 일반 상속세 규정은 바뀌지 않아요.</b> 크게 바뀌는 건 가업(회사)을 물려받는 경우예요.</p>
+</div>
+<div class="integ" id="ig-inh" hidden></div>
+<div class="cards"></div>
+</section>
+
 <section class="cta" aria-labelledby="ctaH">
 <h2 id="ctaH">정확한 판단은 전문가 상담으로</h2>
 <p>이 계산은 정부안과 입력값을 바탕으로 한 참고용 추정치예요. 공제 요건, 중과 배제, 감면 한도처럼 개인 상황에 따라 결과가 달라질 수 있어요. 실제 신고나 절세 계획은 세무 전문가와 상담하세요.</p>
@@ -350,7 +359,7 @@ footer p{margin:0 0 6px}
 <footer>
 <div class="brand"><b>백 회계법인</b> 세무자문본부<small>가상의 법인명이에요 · 회계법인 입사 준비용 포트폴리오 데모</small></div>
 <p>출처: 재정경제부 「2026년 세제개편안」(2026.8.3), 농림축산식품부 보도자료(8.9), 머니투데이방송(8.3), 데일리팜(8.4), KB Think(8.7, 8.24), 포비스 마자르(양도소득세 개편안), 택스넷(일시적 2주택), 뉴스핌(다주택 중과, 8.3), 뉴시스(고령자 이주 감면, 8.6), 김·장 법률사무소·법무법인 태평양 세제개편안 해설(법인세·자기주식), 일간NTN(세목별 핵심사항, 2025 개정세법 총정리), 택스워치(자기주식 과세체계), 한국세정신문(R&D·투자 지역 계수). 정부안 확정(9.1) 이후 국회 본회의 의결은 12월 예정으로 알려져 있어요.</p>
-<p>최종 수정일 <span id="upd">2026.10.26</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
+<p>최종 수정일 <span id="upd">2026.10.27</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
 <p>계산 결과는 정부안과 입력값에 따른 참고용 추정치이며 세무 자문이 아니에요. 부양가족 중복공제, 의제매입세액 공제한도, 증빙 요건, 중과 배제 주택·등록임대 특례, 양도세 감면 한도는 반영하지 않았어요.</p>
 </footer>
 </main>
@@ -359,7 +368,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["corp","법인세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["corp","법인세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"],["inh","상속·증여세"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -445,6 +454,18 @@ function kAll(P,gov){var d=kAdj(gov),c=kCr(),m=gov?P.k.coef:1,si=readI(21),sr=su
 /* 주주 과세를 세목별로 나눔: 양도소득세(주택 외) / 배당소득세(종합소득세) */
 function shCg(i){var r=shTax(i,false,0);return i.pur=="cancel"?0:r.tax}
 function shDiv(i,gov,B){return(i.pur=="cancel"||gov)?shTax(i,gov,B).tax:0}
+/* ── 상속세 (만원) ── */
+var IBR=[[10000,.10,0],[50000,.20,1000],[100000,.30,6000],[300000,.40,16000],[1e12,.50,46000]];
+function itax(tb){if(tb<=0)return 0;for(var i=0;i<IBR.length;i++)if(tb<=IBR[i][0])return tb*IBR[i][1]-IBR[i][2]}
+/* 가업상속공제: 현행 한도 300/400/600억(경영 10/20/30년), 정부안 경영연수×20억(최대 1,000억), 요건 경영 20년(30년 미만은 사후관리 연장)·상속인 종사 5년 */
+function gaCalc(i,gov){var y=+i.yrs,h=+i.heir,biz=+i.biz,oth=+i.oth||0,ok,lim,why="";
+ if(!gov){ok=y>=10&&h>=2;lim=y>=30?6000000:y>=20?4000000:3000000;if(!ok)why=y<10?"경영 10년 미만":"상속인 종사 2년 미만"}
+ else{ok=y>=20&&h>=5;lim=Math.min(y*200000,10000000);if(!ok)why=y<20?"경영 20년 미만":"상속인 종사 5년 미만"}
+ var ded=ok?Math.min(biz,lim):0,tb=Math.max(biz+oth-ded-50000,0),t=itax(tb)*.97;return{ok:ok,why:why,lim:lim,ded:ded,tb:tb,tax:t}}
+/* ── 비사업용 토지 양도 (만원) ── */
+function landCalc(i,gov){var gain=Math.max(+i.sell-(+i.buy),0),y=Math.floor(+i.hold),lt=y>=3?Math.min(y*.02,.3):0,inc=gain*(1-lt),tb=Math.max(inc-250,0),base=prog(tb)+tb*.1;
+ if(y<1)base=Math.max(base,tb*.5);else if(y<2)base=Math.max(base,tb*.4);var loc=prog(tb)*.1+tb*(gov?.02:.01);if(y<2)loc=Math.max(loc,base*.1);
+ return{gain:gain,lt:lt,tb:tb,nat:base,loc:loc,tax:base+loc}}
 /* ── 창업중소기업 세액감면 (조특법 §6) ── */
 function suRate(t,coef,dense,gov){var cap=coef==1,k={1.1:0,1.3:1,1.5:2}[coef];
  if(!gov){if(t=="venture")return .5;if(t=="incub")return .5;if(t=="life"||t=="youngnew")return cap?(dense?.5:.75):1;return cap?(dense?0:.25):.5}
@@ -738,7 +759,28 @@ f:[],link:20,
 need:function(P,i){var s=readI(20);return(s.sell===""||s.buy==="")?"종합소득세 탭의 '회사에 주식을 팔 때'에 판 금액과 취득가액을 입력하면 계산돼요."+go("inc"):""},
 pc:{g:false},pg:{g:true},
 amt:function(P,i,p){var s=readI(20),t=p.g?0:shCg(s);return{v:-t*W,t:s.pur=="cancel"?"이익소각이라 지금도 배당소득 (양도세 없음)":p.g?"양도소득세 없음 (배당소득으로 과세)":"양도소득세 "+man(t)}},
-ml:"양도소득세 변화 (지방소득세 포함)",note:"입력은 종합소득세 탭의 '회사에 주식을 팔 때' 카드와 같이 써요. 늘어나는 배당소득세는 종합소득세 탭에서 계산되니, 두 탭을 합쳐서 보면 거래 전체의 변화예요."}
+ml:"양도소득세 변화 (지방소득세 포함)",note:"입력은 종합소득세 탭의 '회사에 주식을 팔 때' 카드와 같이 써요. 늘어나는 배당소득세는 종합소득세 탭에서 계산되니, 두 탭을 합쳐서 보면 거래 전체의 변화예요."},
+{sec:"inh",title:"가업상속공제 전면 재설계",passed:false,fin:null,
+cur:"피상속인이 10년 이상 경영한 가업을 물려받으면 공제. 한도는 경영기간 10·20·30년 이상에 따라 300·400·600억원. 상속인은 상속 전 2년 이상 가업에 종사, 사후관리 5년",
+gov:"한도를 경영연수 × 20억원(최대 1,000억원)으로. 대신 요건 강화: 피상속인 경영·지분 보유 30년(20~30년은 부족한 기간만큼 사후관리 연장), 상속인 사전 종사 5년, 사후관리 10년. 가업승계 증여세 특례도 같은 방식",
+why:"오래 경영한 기업의 승계는 더 지원하고, 짧게 운영한 기업이나 사업과 관계없는 재산까지 공제받는 일은 줄이려는 취지예요.",when:"2027.7.1 이후 상속·증여분",
+decree:{src:"상증법 제18조의2 개정안",what:"공제대상 토지 범위(건축물 바닥면적의 2~3배), 겸업 시 안분 방법"},
+f:[{k:"biz",l:"가업 상속재산 (만원)",ph:"회사 주식·사업용 자산, 예: 7000000"},{k:"oth",l:"그 밖의 상속재산 (만원)",ph:"예: 300000"},{k:"yrs",l:"피상속인 경영기간 (년)",ph:"예: 32"},{k:"heir",l:"상속인이 상속 전 가업에 종사한 기간 (년)",ph:"예: 6"}],
+need:function(P,i){return i.biz===""||i.yrs===""||i.heir===""?"가업 상속재산, 경영기간, 상속인 종사기간을 입력해 주세요.":""},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var r=gaCalc(i,p.g);return{v:-r.tax*W,t:(r.ok?"공제 "+man(r.ded)+" (한도 "+man(r.lim)+")":"공제 못 받음 ("+r.why+")")+" · 상속세 "+man(r.tax)}},
+detail:function(P,it,f,i){var a=gaCalc(i,false),b=gaCalc(i,true),y=+i.yrs;return '<li>공제 한도: 현행 '+man(a.lim)+' → 정부안 '+man(b.lim)+' (경영 '+y+'년 × 20억원'+(y*200000>10000000?', 최대 1,000억원':'')+')</li>'+(!b.ok?'<li><span class="n">정부안 요건 미달</span>: '+b.why+'이라 공제를 받을 수 없어요'+(a.ok?' (현행은 받을 수 있어요)':'')+'</li>':'')+(b.ok&&y<30?'<li>경영 30년 미만이라 부족한 '+(30-y)+'년만큼 사후관리 기간이 늘어나요 (10년 → '+(10+30-y)+'년)</li>':'')+'<li>과세표준 현행 '+man(a.tb)+' → 정부안 '+man(b.tb)+' (일괄공제 5억원 반영)</li>'},
+ml:"상속세 변화 (신고세액공제 3% 반영)",note:"피상속인의 지분 보유기간은 경영기간과 같다고 보고, 배우자공제·금융재산공제는 없다고 가정했어요. 업종(727개 세세분류)과 지분율 요건은 충족한다고 봤어요. 사후관리 기간 중 요건을 어기면 공제받은 세금을 다시 내야 해요."},
+{sec:"cg",title:"비사업용 토지 양도 시 지방소득세 가산",passed:false,fin:null,
+cur:"비사업용 토지를 팔면 양도세 기본세율에 10%p를 더하고(국세), 지방소득세도 기본세율에 1%p를 더해요",
+gov:"지방소득세 가산세율을 1%p → 2%p로 올려요 (국세 +10%p는 그대로)",
+why:"투기 목적의 토지 보유를 줄이려는 취지예요. 지방세제 개편안(행정안전부)에 들어 있어요.",when:"개정 지방세법 시행 이후 양도분 (적용 시기는 법 확정 때 확인)",
+f:[{k:"sell",l:"양도가액 (만원)",ph:"예: 50000"},{k:"buy",l:"취득가액 + 필요경비 (만원)",ph:"예: 20000"},{k:"hold",l:"보유기간 (년)",ph:"예: 8"}],
+need:function(P,i){return i.sell===""||i.buy===""||i.hold===""?"양도가액, 취득가액, 보유기간을 입력해 주세요.":""},
+pc:{g:false},pg:{g:true},
+amt:function(P,i,p){var r=landCalc(i,p.g);return{v:-r.tax*W,t:"양도세 "+man(r.nat)+" + 지방소득세 "+man(r.loc)}},
+detail:function(P,it,f,i){var r=landCalc(i,true);return '<li>양도차익 '+man(r.gain)+' → 장기보유특별공제 '+Math.round(r.lt*100)+'% → 과세표준 '+man(r.tb)+'</li><li>지방소득세만 바뀌어서, 과세표준의 1%만큼 세금이 늘어요</li>'},
+ml:"양도소득세 + 지방소득세 변화",note:"비사업용 토지에 해당한다고 가정했어요 (사업용인지는 사용 기간·지역 기준으로 따로 판단해요). 보유 2년 미만이면 단기 세율과 비교해 큰 쪽을 적용했어요."}
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
@@ -753,8 +795,8 @@ if(o.rel){r.querySelector(".d-rel").value=o.rel;r.querySelector(".d-age").value=
 r.querySelector(".del").onclick=function(){r.remove();run()};$("deps").appendChild(r)}
 function readI(ix){var o={};ITEMS[ix].f.forEach(function(f){var e=$("f"+ix+f.k);o[f.k]=f.t=="chk"?e.checked:e.value});return o}
 function tbl(head,rows,tot){return '<table class="yr"><tr>'+head.map(function(h){return '<th>'+h+'</th>'}).join("")+'</tr>'+rows.map(function(r,k){return '<tr'+(tot&&k==rows.length-1?' class="tot"':'')+'>'+r.map(function(c){return '<td>'+c+'</td>'}).join("")+'</tr>'}).join("")+'</table>'}
-var IGH={cg:"",coin:"",corp:"법인세 통합 계산",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
-var IGP={cg:"",coin:"",corp:"과세표준부터 세율(10~25%), 세액공제까지 한 번에 계산해요. 법인세는 공제를 받아도 최소한 내야 하는 금액(최저한세)이 있어서, 올해 다 받지 못한 공제는 다음 해로 넘어가요. 창업중소기업 감면과 투자세액공제는 하나만 받을 수 있어 유리한 쪽으로 계산해요.",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
+var IGH={inh:"",cg:"",coin:"",corp:"법인세 통합 계산",home:"이 집에 내는 세금 한눈에",vat:"부가가치세 통합 계산",inc:"종합소득세 통합 계산",cg:"양도소득세 통합 계산"};
+var IGP={inh:"",cg:"",coin:"",corp:"과세표준부터 세율(10~25%), 세액공제까지 한 번에 계산해요. 법인세는 공제를 받아도 최소한 내야 하는 금액(최저한세)이 있어서, 올해 다 받지 못한 공제는 다음 해로 넘어가요. 창업중소기업 감면과 투자세액공제는 하나만 받을 수 있어 유리한 쪽으로 계산해요.",home:"사서(취득세) → 갖고 있다가(재산세·종부세, 2027년부터 양도 연도까지) → 팔 때(양도세)까지 합쳐서 비교해요. 취득세는 양도세 계산 때 필요경비로 빠져요.",
 vat:"의제매입세액공제로 납부세액이 줄면 신용카드 공제 한도도 함께 줄어요. 두 개정을 한 번에 반영해 최종 납부세액을 비교해요.",
 inc:"누진세율 구조라 항목별 효과를 단순히 더하면 실제와 달라요. 과세표준을 다시 구해 세율을 적용하고, 세액공제는 산출세액 한도 안에서 반영해요.",
 cg:"선택한 양도 연도에 정부안의 모든 양도세 개정을 한 번에 반영해 과세표준부터 다시 계산해요."};
@@ -776,7 +818,7 @@ function integ(P,sec){
   if(N===""){var e=(dg+cg2)-(dc+cc);return{e:e,h:tbl(["","현행","정부안"],[["의제매입세액공제",fmt(dc),fmt(dg)],["신용카드 매출 세액공제",fmt(cc),fmt(cg2)],["공제 합계",fmt(dc+cc),fmt(dg+cg2)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e)+'</div><p class="note">공제 전 납부세액을 넣으면 카드 공제의 납부세액 한도까지 반영해요.'+go("vat")+'</p>'}}
   var n=+N*W,pc=Math.max(n-dc,0),pg=Math.max(n-dg,0),kc=Math.min(cc,pc),kg=Math.min(cg2,pg),fc=pc-kc,fg=pg-kg,e2=fc-fg;
   return{e:e2,h:tbl(["","현행","정부안"],[["공제 전 납부세액",fmt(n),fmt(n)],["의제매입세액공제",fmt(dc),fmt(dg)],["카드 공제 (한도 반영)",fmt(kc)+(kc<cc?" ⚠":""),fmt(kg)+(kg<cg2?" ⚠":"")],["최종 납부세액",fmt(fc),fmt(fg)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e2)+'</div><p class="note">'+(kc<cc||kg<cg2?"⚠ 표시는 신용카드 공제가 납부세액 한도에 걸린 경우예요. ":"")+'간이과세자 등 다른 계산 구조는 반영하지 않았어요.</p>'}}
- if(sec=="cg"){var it=ITEMS[22],m=it.need(P,{});if(m)return{h:""};var e=it.amt(P,{},it.pg).v-it.amt(P,{},it.pc).v;return{e:e,h:""}}
+ if(sec=="cg"||sec=="inh"){var e=null;(sec=="cg"?[22,24]:[23]).forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(it.need(P,i))return;e=(e||0)+it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v});return e==null?{h:""}:{e:e,h:""}}
 }
 function run(){
 $("hotherf").hidden=$("hcnt").value=="1";var P=readP();$("pincl").textContent=P.type=="wage"?"연 총급여 (만원)":"연 종합소득금액 (만원)";
@@ -793,7 +835,7 @@ var c=it.amt(P,i,it.pc),g=it.amt(P,i,it.pg),f=fin?it.amt(P,i,fin.p):null,b=f||g,
 res.innerHTML=tag+(it.detail?'<ul class="det">'+it.detail(P,it,fin,i)+'</ul>':'')+'<dl><dt>'+(it.law?"2026년까지":"현행")+'</dt><dd>'+c.t+'</dd><dt>'+(it.law?"2027년부터":"정부안")+'</dt><dd>'+g.t+'</dd>'+(f?'<dt>국회 확정안</dt><dd>'+f.t+'</dd><dt>정부안 대비 확정안 차이</dt><dd>'+fmt(f.v-g.v)+'</dd>':'')+'</dl><div class="main"><span>'+it.ml+'</span>'+sign(e,it.lab)+'</div><p class="note">'+it.note+'</p>';
 });
 var dec=ITEMS.filter(function(it){return it.decree&&!it.decree.text}).length;$("stat").innerHTML='본회의 통과 <b>'+pass+' / '+ITEMS.filter(function(x){return !x.law}).length+'건</b> · 정부안에서 수정된 항목 <b>'+chg+'건</b> · 시행령 확인 대기 <b>'+dec+'건</b>';
-var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig-"+s[0])}).map(function(s){var r=integ(P,s[0]);if(s[0]=="home"){var hh=H();if(!hNeed(hh)){var q=(cgCalc(P,CUR).tax-cgCalc(P,GOV).tax)*W;SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택 · '+hh.y+'년에 팔 때)</small><b>'+sign(q)+'</b></button>')}else SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택)</small><b><span class="flat">입력 전</span></b></button>')}$("ig-"+s[0]).innerHTML='<h2>'+(s[0]=="corp"?coName(P)+" ":"")+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+(s[0]=="home"?"내 집 보유세 (2027년)":s[0]=="corp"?coName(P)+" 법인세":s[0]=="cg"?"양도소득세 (주택 외)":s[1])+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'+(s[0]=="home"?SUMX.join(""):"")}).join("");
+var SUMX=[];$("sum").innerHTML=SECS.filter(function(s){return s[0]!="sum"&&$("ig-"+s[0])}).map(function(s){var r=integ(P,s[0]);if(s[0]=="home"){var hh=H();if(!hNeed(hh)){var q=(cgCalc(P,CUR).tax-cgCalc(P,GOV).tax)*W;SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택 · '+hh.y+'년에 팔 때)</small><b>'+sign(q)+'</b></button>')}else SUMX.push('<button type="button" data-sec="home" data-top="1"><small>양도소득세 (주택)</small><b><span class="flat">입력 전</span></b></button>')}$("ig-"+s[0]).innerHTML='<h2>'+(s[0]=="corp"?coName(P)+" ":"")+IGH[s[0]]+'</h2><p>'+IGP[s[0]]+'</p><div class="tag">정부안 기준 · 확정 아님</div>'+r.h;return '<button type="button" data-sec="'+s[0]+'" data-top="1"><small>'+(s[0]=="home"?"내 집 보유세 (2027년)":s[0]=="corp"?coName(P)+" 법인세":s[0]=="cg"?"양도소득세 (주택 외)":s[0]=="inh"?"상속세 (가업상속)":s[1])+'</small><b>'+(r.e!=null?sign(r.e27!=null?r.e27:r.e):'<span class="flat">입력 전</span>')+'</b></button>'+(s[0]=="home"?SUMX.join(""):"")}).join("");
 }
 function tab(n){for(var k=0;k<3;k++){$("b"+k).setAttribute("aria-selected",k==n?"true":"false");$("t"+k).hidden=k!=n}}
 [0,1,2].forEach(function(k){$("b"+k).onclick=function(){tab(k)}});
@@ -832,7 +874,7 @@ $("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true;$("rsin")
 $("bform").value="ind";$("bprev").value=30000;$("bind").checked=true;$("bnet").value=1200;
 $("hkind").value="house";$("hbuy").value=90000;$("hpub").value=150000;$("hsell").value=200000;$("hy").value="2029";$("hage").value=45;$("hhold").value=12;$("hlive").value=6;$("hres").checked=true;$("hfirst").checked=true;
 $("hexp").value=1000;$("hreg").value="y";$("hone").checked=true;$("hsen").checked=false;
-var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1,"f15sell":5000,"f15buy":2000,"kptb":100000,"f16amt":3000,"f17rd":4000,"f17inv":2500,"f18cong":300,"f18etc":100,"f19price":8000,"f19biz":100,"f20sell":8000,"f20buy":3000,"f20fin":500};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;$("kpname").value="백상우상사(주)";$("kpsize").value="big";$("kpreg").value="1.3";$("f16kind").value="gain";$("f19kind").value="eco";$("f20pur").value="other";$("f20co").value="sme";$("f20big").checked=false;$("f21type").value="sme";$("f21dense").checked=false;run()};
+var d={"f1rent":1200,"f2fr":3000,"f3sales":30000,"f3buy":8000,"f4pay":30000,"f9acq":"2026-03-15","f10tot":3000,"f10asset":15000,"f11price":6000,"f11biz":100,"f12n":1,"f15sell":5000,"f15buy":2000,"kptb":100000,"f16amt":3000,"f17rd":4000,"f17inv":2500,"f18cong":300,"f18etc":100,"f19price":8000,"f19biz":100,"f20sell":8000,"f20buy":3000,"f20fin":500,"f23biz":7000000,"f23oth":300000,"f23yrs":32,"f23heir":6,"f24sell":50000,"f24buy":20000,"f24hold":8};for(var k in d)$(k).value=d[k];$("f9adj").checked=true;$("f10hh").value="auto";$("f11kind").value="eco";$("f12ok").checked=true;$("kpname").value="백상우상사(주)";$("kpsize").value="big";$("kpreg").value="1.3";$("f16kind").value="gain";$("f19kind").value="eco";$("f20pur").value="other";$("f20co").value="sme";$("f20big").checked=false;$("f21type").value="sme";$("f21dense").checked=false;run()};
 document.addEventListener("click",function(e){var c=e.target.closest("[data-c]");if(!c)return;var q=c.dataset.c.split("-");c.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===c?"true":"false")});[0,1,2].forEach(function(k){var el=$("cp"+q[0]+"-"+k);if(el)el.hidden=k!=q[1]})});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;var q=b.dataset.g.split("-"),ix=q[0];b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});ITEMS[ix].guide.forEach(function(_,k){$("gp"+ix+"-"+k).hidden=k!=q[1]})});
 function gsum(){var v=function(id){return +$(id).value||0},dep=v("gdep"),base=v("gbase"),fam=$("gfam").checked,d=dep?(base?(fam?base:Math.min(dep,base*.55)):dep):0,t=v("gh")+v("gcar")+v("gfin")+v("getc")+d;$("gsum").innerHTML="재산 합계 "+man(t)+(dep&&base?" (전세금 "+man(d)+(fam?", 기준시가 100%":dep>base*.55?", 간주전세금 적용":", 실제 전세금 적용")+")":"");return t}

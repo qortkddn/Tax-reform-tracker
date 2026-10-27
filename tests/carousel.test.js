@@ -7,7 +7,7 @@ for(const dev of [{viewport:{width:390,height:844},hasTouch:true,isMobile:true},
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));await p.waitForTimeout(400);
  for(let r=0;r<2;r++){const y=await p.evaluate(()=>scrollY);if(y>0){fail++;console.log('FAIL 첫 화면이 맨 위에서 시작하지 않음 (scrollY='+y+')')}if(!r){await p.reload();await p.waitForTimeout(400)}}
  await p.click('#demo');
- for(const s of ['home','vat','inc','corp','coin','cg']){await p.click('#st-'+s);const sec=p.locator('#sec-'+s);const n=await sec.locator('.cards > .card').count();if(!n)continue;
+ for(const s of ['home','vat','inc','corp','coin','cg','inh']){await p.click('#st-'+s);const sec=p.locator('#sec-'+s);const n=await sec.locator('.cards > .card').count();if(!n)continue;
   const check=async(how,k)=>{await p.waitForTimeout(700);const r=await sec.evaluate(el=>{const box=el.querySelector('.cards'),L=box.getBoundingClientRect().left;let best=0,bd=1e9;[...box.children].forEach((c,j)=>{const d=Math.abs(c.getBoundingClientRect().left-L);if(d<bd){bd=d;best=j}});return{vis:box.children[best].querySelector('h3').textContent,chip:el.querySelector('.chips [aria-current="true"]').textContent,cnt:el.querySelector('.cnt').textContent,best,hdiff:Math.abs(box.getBoundingClientRect().height-box.children[best].getBoundingClientRect().height)}});
    const ok=r.vis===r.chip&&r.cnt===(r.best+1)+' / '+n&&(k==null||r.best===k)&&r.hdiff<=2;if(!ok){fail++;console.log('FAIL',dev.viewport.width,s,how,k,r)}};
   for(let k=1;k<n;k++){await sec.locator('.arr').nth(1).click();await check('next',k)}

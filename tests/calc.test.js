@@ -41,6 +41,12 @@ const CASES=[
  ['투자공제가 더 유리하면 투자공제 선택','kBest({k:{tb:"100000",size:"sme"}},0,0,9000,.25).pick=="inv"?1:0',1,0],
  ['간단 계산: 직장인 4,000만·배우자 700만·월세 1,200만 → 기본공제+월세 통합 (산출세액 한도)','(QA={type:"wage",inc:"4000",sp:"pay",spPay:"700",deps:"1",rent:"1200",house:"0",coin:"0"},qCalc().items.slice(0,2).reduce(function(a,x){return a+x.v},0))',431750,1],
  ['간단 계산: 같은 사람 + 1주택 15억(6년 거주) + 코인 1,000만 → 합계','(QA={type:"wage",inc:"4000",sp:"pay",spPay:"700",deps:"1",rent:"1200",house:"1",pub:"150000",live:"6",coin:"1000"},Math.round(qCalc().tot))',-350918,1],
+ ['상속세 산출세액: 과세표준 125억원','itax(1250000)',579000,0.01],
+ ['가업상속공제 현행: 경영 32년(한도 600억), 가업 700억·기타 30억','gaCalc({biz:"7000000",oth:"300000",yrs:"32",heir:"6"},false).tax',561630,0.01],
+ ['가업상속공제 정부안: 32년×20억=640억 한도','gaCalc({biz:"7000000",oth:"300000",yrs:"32",heir:"6"},true).tax',367630,0.01],
+ ['가업상속공제 정부안: 상속인 종사 3년이면 공제 불가','gaCalc({biz:"500000",oth:"200000",yrs:"25",heir:"3"},true).ok?1:0',0,0],
+ ['비사업용 토지: 5억 양도·2억 취득·8년 (현행 지방소득세 +1%p)','landCalc({sell:"50000",buy:"20000",hold:"8"},false).tax',10980.2,0.01],
+ ['비사업용 토지: 같은 토지 정부안 (+2%p)','landCalc({sell:"50000",buy:"20000",hold:"8"},true).tax',11229.7,0.01],
 ];
 (async()=>{const b=await chromium.launch();const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto('file://'+path.resolve(__dirname,'../index.html'));
