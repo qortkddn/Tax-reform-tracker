@@ -214,7 +214,7 @@ footer p{margin:0 0 6px}
 <p class="kicker"><b>백 회계법인</b> 세무자문본부 <span>(가상 법인 · 데모)</span></p>
 <h1>2026 세제개편 시뮬레이터</h1>
 <section id="sec-sum" hidden>
-<p class="lead">지금 세법 그대로일 때와 비교해, 세제개편으로 <b>내가 낼 세금이 얼마나 달라지는지</b> 알려주는 계산기예요.</p>
+<p class="lead">올해(2026년)와 비교해, 세제개편으로 <b>내년부터 낼 세금이 얼마나 달라지는지</b> 알려주는 계산기예요.</p>
 <div class="qk" id="qk"></div>
 <h2 class="sumh">개정안으로 내 세금은 이렇게 달라져요</h2>
 <p class="stat" id="stat"></p>
@@ -359,7 +359,7 @@ footer p{margin:0 0 6px}
 <footer>
 <div class="brand"><b>백 회계법인</b> 세무자문본부<small>가상의 법인명이에요 · 회계법인 입사 준비용 포트폴리오 데모</small></div>
 <p>출처: 재정경제부 「2026년 세제개편안」(2026.8.3), 농림축산식품부 보도자료(8.9), 머니투데이방송(8.3), 데일리팜(8.4), KB Think(8.7, 8.24), 포비스 마자르(양도소득세 개편안), 택스넷(일시적 2주택), 뉴스핌(다주택 중과, 8.3), 뉴시스(고령자 이주 감면, 8.6), 김·장 법률사무소·법무법인 태평양 세제개편안 해설(법인세·자기주식), 일간NTN(세목별 핵심사항, 2025 개정세법 총정리), 택스워치(자기주식 과세체계), 한국세정신문(R&D·투자 지역 계수). 정부안 확정(9.1) 이후 국회 본회의 의결은 12월 예정으로 알려져 있어요.</p>
-<p>최종 수정일 <span id="upd">2026.10.27</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
+<p>최종 수정일 <span id="upd">2026.11.03</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
 <p>계산 결과는 정부안과 입력값에 따른 참고용 추정치이며 세무 자문이 아니에요. 부양가족 중복공제, 의제매입세액 공제한도, 증빙 요건, 중과 배제 주택·등록임대 특례, 양도세 감면 한도는 반영하지 않았어요.</p>
 </footer>
 </main>
@@ -558,15 +558,15 @@ need:function(P,i){return i.fr===""?"연 수입금액을 입력해 주세요.":"
 amt:function(P,i,p){var a=+i.fr*W*p.r;return{v:-a,t:fmt(a)}},
 decree:{src:"소득세법 시행령",what:"어느 지급분부터 2%가 적용되는지 (시행령 시행일)",text:null},ml:"미리 떼는 세금 변화",lab:["미리 떼는 세금이 줄어요","미리 떼는 세금이 늘어요"],note:"최종 세액이 줄어드는 것이 아니라 선납분이 줄어드는 효과라 통합 계산에는 넣지 않았어요."},
 {sec:"vat",title:"음식점업 의제매입세액공제 우대 공제율 기한 연장",passed:false,fin:null,
-cur:"연 매출 4억원 이하 개인 음식점 9/109 우대 공제율을 2026.12.31까지 적용 (연장이 없으면 이후 8/108)",
+cur:"2026년 지금은 연 매출 4억원 이하 개인 음식점에 9/109 우대 공제율 적용 (2026.12.31까지, 연장이 없으면 2027년부터 8/108)",
 gov:"우대 공제율 9/109 적용 기한을 2028.12.31까지 2년 연장",
-pc:{pref:false},pg:{pref:true},
+pc:{pref:true},pg:{pref:true},
 why:"원자재 가격·인건비·공공요금 상승으로 어려운 영세 자영업자의 부담을 덜고 외식물가를 안정시키려는 취지예요.",when:"기한 연장 (2028.12.31까지)",
 f:[{k:"sales",l:"연 매출액 (만원)",ph:"예: 30000"},{k:"buy",l:"연 면세 농축수산물 매입액 (만원)",ph:"예: 8000"}],
 need:function(P,i){return i.sales===""||i.buy===""?"연 매출액과 매입액을 입력해 주세요.":""},
 amt:function(P,i,p){var d=deemed(P,p.pref);return{v:d.v,t:fmt(d.v)+" ("+d.l+")"}},
-detail:function(P,it,f,i){return '<li>'+(P.b.form=="corp"?'<span class="n">우대 대상 아님</span>: 법인 음식점은 6/106 고정'+go("vat"):+i.sales>40000?'<span class="n">우대 대상 아님</span>: 연 매출 4억원 초과':'<span class="y">우대 대상</span> · 개인 음식점, 연 매출 4억원 이하')+'</li>'},
-ml:"연장으로 유지되는 공제액",note:"비교 기준은 연장이 없을 때의 2027년 이후 규정이에요."},
+detail:function(P,it,f,i){return '<li>'+(P.b.form=="corp"?'<span class="n">우대 대상 아님</span>: 법인 음식점은 6/106 고정'+go("vat"):+i.sales>40000?'<span class="n">우대 대상 아님</span>: 연 매출 4억원 초과':'<span class="y">우대 대상</span> · 개인 음식점, 연 매출 4억원 이하')+'</li>'+(function(){var a=deemed(P,true),b=deemed(P,false),d=a.v-b.v;return d>0.5?'<li>정부안이 <b>통과되지 않으면</b> 2027년부터 8/108이 돼서 공제액이 '+fmt(b.v)+'으로 <b>'+fmt(d)+' 줄어요</b></li>':''})()},
+ml:"올해(2026년)와 비교한 공제액 변화",note:"비교 기준은 올해(2026년) 공제율이에요. 정부안대로 연장되면 올해와 같고, 연장이 안 되면 위처럼 줄어요."},
 {sec:"vat",title:"신용카드 매출 세액공제 축소",passed:false,fin:null,
 cur:"공제율 1.3%, 연간 한도 1,000만원 (한시 우대, 2026.12.31 일몰 예정)",
 gov:"공제율 1.2%, 연간 한도 500만원. 2027.1.1 이후 카드매출분부터 적용",
@@ -576,7 +576,7 @@ f:[{k:"pay",l:"연 신용카드 등 결제금액 (만원)",ph:"예: 30000"}],
 need:function(P,i){return i.pay===""?"연 결제금액을 입력해 주세요.":P.b.prev===""?"직전연도 공급가액을 입력해 주세요."+go("vat"):""},
 amt:function(P,i,p){var v=card(P,p.g);return{v:v,t:cardOK(P).ok?fmt(v):"대상 아님"}},
 detail:function(P){var r=cardOK(P);return '<li>'+(r.ok?'<span class="y">요건 충족</span> · 개인사업자, 대상 업종, 직전연도 공급가액 10억원 이하':'<span class="n">공제 대상 아님</span>: '+r.w.join(", ")+go("vat"))+'</li>'},
-ml:"세액공제 변화",note:"현행 1.3%는 2026.12.31 일몰 예정이라, 개정안이 통과되지 않을 때 적용되는 공제율은 별도 확인이 필요해요. 납부세액 한도는 위 통합 계산에 반영돼요."},
+ml:"세액공제 변화",note:"비교 기준은 올해(2026년) 우대 공제율 1.3%·한도 1,000만원이에요. 정부안이 통과되지 않으면 2027년부터 법 원칙인 1%·연 500만원이 적용돼요(부가가치세법 제46조). 납부세액 한도는 위 통합 계산에 반영돼요."},
 {sec:"home",title:"팔 때: 장기보유특별공제 → 장기거주소득공제",passed:false,fin:null,
 cur:"1세대 1주택: 보유 연 4% + 거주 연 4% (각 최대 40%, 합계 최대 80%). 공제액 상한 없음",
 gov:"주택은 '장기거주소득공제'로 개편. 2027년까지 현행 유지 → 2028년 보유 연 2% + 거주 연 6% → 2029년부터 거주 연 8%만 인정. 공제액 상한 신설 (2028년 20억원, 2029년 이후 10억원)",
@@ -814,7 +814,7 @@ function integ(P,sec){
   var a=incCalc(P,false),g=incCalc(P,true),si=readI(20),sh=!ITEMS[20].need(P,si),sc=sh?shDiv(si,false,a.tb):0,sg=sh?shDiv(si,true,g.tb):0,e=(a.tot+sc-g.tot-sg)*W,simple=0;[0,1,11,12].forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(!it.need(P,i)){simple+=it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v}});if(sh)simple-=(shDiv(si,true,+P.tb)-shDiv(si,false,+P.tb))*W;
   return{e:e,h:tbl(["","현행","정부안"],[["기본공제 인원",a.n+"명",g.n+"명"],["업무용 승용차 추가 비용",man(0),man(g.car)],["과세표준",man(a.tb),man(g.tb)],["적용 최고세율",mr(a.tb)+"%",mr(g.tb)+"%"],["산출세액",man(a.calc),man(g.calc)],["월세세액공제",man(a.rent),man(g.rent)],["육아휴직 복귀자 추가공제",man(a.leave),man(g.leave)],["세액공제 합계 (산출세액 한도)",man(a.cr),man(g.cr)],["결정세액",man(a.dec),man(g.dec)],["지방소득세 포함",man(a.tot),man(g.tot)]].concat(sh?[["회사에 판 주식의 배당소득세 (지방세 포함)",man(sc),man(sg)],["합계",man(a.tot+sc),man(g.tot+sg)]]:[]),true)+'<div class="main"><span>종합소득세 변화</span>'+sign(e)+'</div><p class="note">항목별 효과를 단순히 더하면 세금을 '+fmt(Math.abs(simple))+(simple>=0?' 덜':' 더')+' 내는 것으로 나와서, 통합 계산과 '+fmt(Math.abs(Math.abs(simple)-Math.abs(e)))+' 차이가 나요.'+(sh&&si.pur!="cancel"?' 회사에 판 주식은 지금은 양도소득세라 여기에는 정부안의 배당소득세만 더해지고, 빠지는 양도소득세는 양도소득세 (주택 외) 탭에 따로 계산돼요.':'')+(a.rent+a.leave>a.cr||g.rent+g.leave>g.cr?' 세액공제가 산출세액 한도에 걸렸어요.':'')+' 원천징수 선납분과 근로장려금은 세액이 아니라 제외했어요.</p>'}}
  if(sec=="vat"){var s3=$("f3sales").value,s4=$("f4pay").value;if((s3===""||$("f3buy").value==="")&&s4==="")return{h:'<p class="need">아래 항목에 매출·매입액이나 카드 결제금액을 입력하면 계산돼요.</p>'};
-  var dc=deemed(P,false).v,dg=deemed(P,true).v,cc=card(P,false),cg2=card(P,true),N=P.b.net;
+  var dc=deemed(P,true).v,dg=deemed(P,true).v,cc=card(P,false),cg2=card(P,true),N=P.b.net;
   if(N===""){var e=(dg+cg2)-(dc+cc);return{e:e,h:tbl(["","현행","정부안"],[["의제매입세액공제",fmt(dc),fmt(dg)],["신용카드 매출 세액공제",fmt(cc),fmt(cg2)],["공제 합계",fmt(dc+cc),fmt(dg+cg2)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e)+'</div><p class="note">공제 전 납부세액을 넣으면 카드 공제의 납부세액 한도까지 반영해요.'+go("vat")+'</p>'}}
   var n=+N*W,pc=Math.max(n-dc,0),pg=Math.max(n-dg,0),kc=Math.min(cc,pc),kg=Math.min(cg2,pg),fc=pc-kc,fg=pg-kg,e2=fc-fg;
   return{e:e2,h:tbl(["","현행","정부안"],[["공제 전 납부세액",fmt(n),fmt(n)],["의제매입세액공제",fmt(dc),fmt(dg)],["카드 공제 (한도 반영)",fmt(kc)+(kc<cc?" ⚠":""),fmt(kg)+(kg<cg2?" ⚠":"")],["최종 납부세액",fmt(fc),fmt(fg)]],true)+'<div class="main"><span>부가가치세 변화</span>'+sign(e2)+'</div><p class="note">'+(kc<cc||kg<cg2?"⚠ 표시는 신용카드 공제가 납부세액 한도에 걸린 경우예요. ":"")+'간이과세자 등 다른 계산 구조는 반영하지 않았어요.</p>'}}
