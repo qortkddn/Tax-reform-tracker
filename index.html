@@ -359,7 +359,7 @@ footer p{margin:0 0 6px}
 <footer>
 <div class="brand"><b>백 회계법인</b> 세무자문본부<small>가상의 법인명이에요 · 회계법인 입사 준비용 포트폴리오 데모</small></div>
 <p>출처: 재정경제부 「2026년 세제개편안」(2026.8.3), 농림축산식품부 보도자료(8.9), 머니투데이방송(8.3), 데일리팜(8.4), KB Think(8.7, 8.24), 포비스 마자르(양도소득세 개편안), 택스넷(일시적 2주택), 뉴스핌(다주택 중과, 8.3), 뉴시스(고령자 이주 감면, 8.6), 김·장 법률사무소·법무법인 태평양 세제개편안 해설(법인세·자기주식), 일간NTN(세목별 핵심사항, 2025 개정세법 총정리), 택스워치(자기주식 과세체계), 한국세정신문(R&D·투자 지역 계수). 정부안 확정(9.1) 이후 국회 본회의 의결은 12월 예정으로 알려져 있어요.</p>
-<p>최종 수정일 <span id="upd">2026.11.03</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
+<p>최종 수정일 <span id="upd">2026.11.05</span>. 본회의 통과 여부와 확정안은 이 날짜까지 확인된 범위예요.</p>
 <p>계산 결과는 정부안과 입력값에 따른 참고용 추정치이며 세무 자문이 아니에요. 부양가족 중복공제, 의제매입세액 공제한도, 증빙 요건, 중과 배제 주택·등록임대 특례, 양도세 감면 한도는 반영하지 않았어요.</p>
 </footer>
 </main>
@@ -368,7 +368,7 @@ var W=10000;
 var fmt=function(n){return Math.round(n).toLocaleString("ko-KR")+"원"};
 var man=function(v){return fmt(v*W)};
 var $=function(id){return document.getElementById(id)};
-var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["corp","법인세법"],["coin","가상자산(코인)"],["cg","양도소득세 (주택 외)"],["inh","상속·증여세"]];
+var SECS=[["sum","한눈에 보기"],["home","내 집 한 채"],["vat","부가가치세법"],["inc","종합소득세법"],["corp","법인세법"],["cg","양도소득세 (주택 외)"],["inh","상속·증여세"]];
 var REL={spouse:"배우자",asc:"직계존속",desc:"직계비속",sib:"형제자매"};
 var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
@@ -896,7 +896,6 @@ var QS=[
  {k:"house",q:"집이 있나요?",t:"ch",o:[["0","없어요"],["1","1채 있어요"],["2","2채 이상 있어요"]]},
  {k:"pub",q:"가진 집의 공시가격은 모두 합쳐 얼마인가요?",sub:"부동산 공시가격 알리미에서 확인할 수 있어요. 대략이면 충분해요.",t:"num",u:"만원",ph:"150,000",when:function(){return QA.house!="0"},
   extra:[{k:"live",l:"그 집에 실제로 산 기간",u:"년",ph:"6"}]},
- {k:"coin",q:"2027년에 코인을 팔아 벌 것 같은 돈은?",sub:"없으면 0이에요. 2027년부터 코인 이익에 세금이 생겨요.",t:"num",u:"만원",ph:"0"}
 ];
 function qList(){return QS.filter(function(q){return !q.when||q.when()})}
 function qv(v){return typeof v=="function"?v():v}
@@ -921,10 +920,8 @@ function qCalc(){var r=[],tot=0,T=qTb(),g=qNum("inc"),sp=QA.sp,spp=qNum("spPay")
  if(QA.house&&QA.house!="0"&&qNum("pub")>0){var lv=qNum("live"),h={kind:"house",pub:String(qNum("pub")),cnt:QA.house=="1"?"1":"2",other:"0",adj:false,res:lv>0,age:"45",hold:String(lv),live:String(lv),y:"2027"};
   var cc=comp(h,2027,false).tot,cg=comp(h,2027,true).tot,dc=(cc-cg)*W;
   r.push({t:QA.house=="1"?"종합부동산세 개편 (1주택)":"종합부동산세 개편 (다주택)",v:dc,y:"2027년분부터",w:QA.house=="1"?(cc<0.5&&cg<0.5?"공시가격이 기본공제 이하라 지금도 정부안도 종부세가 없어요.":"실거주면 기본공제가 12억원 → 14억원으로 늘지만, 과세 기준 비율(60% → 70%)과 세율이 오르고 세액공제가 보유기간에서 거주기간 기준으로 바뀌어요. 이 영향을 모두 합친 결과예요."):"다주택은 기본공제가 9억원에서 4억원(+실거주 비율만큼 최대 5억원)으로 바뀌고 과세 기준 비율이 오르면서 세금이 크게 늘 수 있어요. 실제 주택별 상황은 '내 집 한 채'에서 자세히 볼 수 있어요."});tot+=dc}
- /* 코인 */
- var cn=qNum("coin");if(cn>0){var ct=Math.max(cn-250,0)*.22*W;r.push({t:"가상자산(코인) 과세 시작",v:-ct,y:"2027년부터",w:ct>0?"코인으로 번 돈에서 250만원을 빼고 22%(지방소득세 포함)를 내요. 다른 소득과 합치지 않고 따로 계산해요. 국회에서 유예 여부를 논의 중이에요.":"번 돈이 250만원 이하라 세금이 없어요."});tot-=ct}
  return{items:r,tot:tot,tb:T.tb}}
-function qTimeline(){var a=[["2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대, 근로장려금 확대가 시작돼요."+(QA.house!="0"?" 종합부동산세 개편도 이때부터예요.":"")+(qNum("coin")>0?" 코인 과세도 시작돼요.":"")]];
+function qTimeline(){var a=[["2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대, 근로장려금 확대가 시작돼요."+(QA.house!="0"?" 종합부동산세 개편도 이때부터예요.":"")]];
  if(QA.house&&QA.house!="0"){a.push(["2028",QA.house=="1"?"1주택 양도세가 거주 기간 중심으로 바뀌기 시작해요 (보유 연 2% + 거주 연 6%). 종부세 세율표도 하나로 합쳐져요.":"다주택 양도세 중과가 2027년보다 커져요 (+10%p / +15%p). 종부세 세율표가 하나로 합쳐져요."]);
   a.push(["2029",QA.house=="1"?"양도세 장기공제가 거주 연 8%만 남아요. 오래 갖고만 있고 살지 않은 집은 공제가 크게 줄어요.":"다주택 양도세 중과가 원래대로 (+20%p / +30%p) 돌아가요."])}
  return a}
@@ -949,7 +946,6 @@ function qFill(){var T=qTb(),biz=QA.type=="biz";$("ptype").value=biz?"biz":"wage
  if(qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
  $("f10hh").value="auto";$("f10tot").value=qNum("inc")+(QA.sp=="pay"?qNum("spPay"):0);
  if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");$("hhold").value=qNum("live");if(QA.house!="1")$("hother").value=0}
- if(qNum("coin")>0){$("f15sell").value=qNum("coin");$("f15buy").value=0}
  run();showSec("inc");$("p-inc").scrollIntoView({behavior:"smooth"})}
 document.addEventListener("input",qComma);
 document.addEventListener("click",function(e){var b=e.target.closest("#qk [data-q]");if(!b)return;var a=b.dataset.q,L=qList();
