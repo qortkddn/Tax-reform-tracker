@@ -237,9 +237,10 @@ footer p{margin:0 0 6px}
 <div class="fld"><label for="hsell">예상 양도가액 (만원)</label><input id="hsell" type="number" inputmode="numeric" min="0" placeholder="예: 200000"></div>
 <div class="fld"><label for="hy">양도 예정 연도</label><select id="hy"><option value="2027">2027년</option><option value="2028">2028년</option><option value="2029">2029년</option><option value="2030">2030년</option></select></div>
 <div class="fld"><label for="hage">현재 나이 (만)</label><input id="hage" type="number" inputmode="numeric" min="0" placeholder="예: 35"></div>
-<div class="fld"><label for="hhold">팔 때까지 보유기간 (년)</label><input id="hhold" type="number" inputmode="numeric" min="0" placeholder="예: 12"></div>
-<div class="fld"><label for="hlive">팔 때까지 거주기간 (년)</label><input id="hlive" type="number" inputmode="numeric" min="0" placeholder="예: 6"></div>
+<div class="fld"><label for="hhold">팔 때까지 보유기간 (년 · 1년 미만 버림)</label><input id="hhold" type="number" inputmode="numeric" min="0" placeholder="예: 12"></div>
+<div class="fld"><label for="hlive">팔 때까지 거주기간 (년 · 1년 미만 버림)</label><input id="hlive" type="number" inputmode="numeric" min="0" placeholder="예: 6"></div>
 </div>
+<p class="hint">기간 세는 법: 보유기간은 산 날(잔금일과 등기접수일 중 빠른 날)부터 판 날까지예요. 첫날은 세지 않아요(초일불산입, 국세기본법 §4 → 민법 §157). 그래서 2020.3.10에 사서 2027.3.10에 팔면 꼭 7년이에요. 1년이 안 되는 기간은 버리고 적어 주세요(7년 6개월 → 7년). 거주기간은 주민등록 전입일부터 전출일까지예요.</p>
 <label class="chk"><input type="checkbox" id="hres">지금 이 집에 실제로 살고 있어요</label>
 <label class="chk"><input type="checkbox" id="hadj">이 집이 조정대상지역에 있어요</label>
 <label class="chk"><input type="checkbox" id="hfirst">생애 처음으로 사는 집이에요</label>
@@ -768,7 +769,7 @@ cur:"피상속인이 10년 이상 경영한 가업을 물려받으면 공제. �
 gov:"한도를 경영연수 × 20억원(최대 1,000억원)으로. 대신 요건 강화: 피상속인 경영·지분 보유 30년(20~30년은 부족한 기간만큼 사후관리 연장), 상속인 사전 종사 5년, 사후관리 10년. 가업승계 증여세 특례도 같은 방식",
 why:"오래 경영한 기업의 승계는 더 지원하고, 짧게 운영한 기업이나 사업과 관계없는 재산까지 공제받는 일은 줄이려는 취지예요.",when:"2027.7.1 이후 상속·증여분",
 decree:{src:"상증법 제18조의2 개정안",what:"공제대상 토지 범위(건축물 바닥면적의 2~3배), 겸업 시 안분 방법"},
-f:[{k:"biz",l:"가업 상속재산 (만원)",ph:"회사 주식·사업용 자산, 예: 7000000"},{k:"oth",l:"그 밖의 상속재산 (만원)",ph:"예: 300000"},{k:"yrs",l:"피상속인 경영기간 (년)",ph:"예: 32"},{k:"heir",l:"상속인이 상속 전 가업에 종사한 기간 (년)",ph:"예: 6"}],
+f:[{k:"biz",l:"가업 상속재산 (만원)",ph:"회사 주식·사업용 자산, 예: 7000000"},{k:"oth",l:"그 밖의 상속재산 (만원)",ph:"예: 300000"},{k:"yrs",l:"피상속인 경영기간 (년 · 상속개시일 기준, 1년 미만 버림)",ph:"예: 32"},{k:"heir",l:"상속인이 상속 전 가업에 종사한 기간 (년 · 1년 미만 버림)",ph:"예: 6"}],
 need:function(P,i){return i.biz===""||i.yrs===""||i.heir===""?"가업 상속재산, 경영기간, 상속인 종사기간을 입력해 주세요.":""},
 pc:{g:false},pg:{g:true},
 amt:function(P,i,p){var r=gaCalc(i,p.g);return{v:-r.tax*W,t:(r.ok?"공제 "+man(r.ded)+" (한도 "+man(r.lim)+")":"공제 못 받음 ("+r.why+")")+" · 상속세 "+man(r.tax)}},
@@ -778,7 +779,7 @@ ml:"상속세 변화 (신고세액공제 3% 반영)",note:"피상속인의 지�
 cur:"비사업용 토지를 팔면 양도세 기본세율에 10%p를 더하고(국세), 지방소득세도 기본세율에 1%p를 더해요",
 gov:"지방소득세 가산세율을 1%p → 2%p로 올려요 (국세 +10%p는 그대로)",
 why:"투기 목적의 토지 보유를 줄이려는 취지예요. 지방세제 개편안(행정안전부)에 들어 있어요.",when:"개정 지방세법 시행 이후 양도분 (적용 시기는 법 확정 때 확인)",
-f:[{k:"sell",l:"양도가액 (만원)",ph:"예: 50000"},{k:"buy",l:"취득가액 + 필요경비 (만원)",ph:"예: 20000"},{k:"hold",l:"보유기간 (년)",ph:"예: 8"}],
+f:[{k:"sell",l:"양도가액 (만원)",ph:"예: 50000"},{k:"buy",l:"취득가액 + 필요경비 (만원)",ph:"예: 20000"},{k:"hold",l:"보유기간 (년 · 산 날 다음 날부터 판 날까지, 1년 미만 버림)",ph:"예: 8"}],
 need:function(P,i){return i.sell===""||i.buy===""||i.hold===""?"양도가액, 취득가액, 보유기간을 입력해 주세요.":""},
 pc:{g:false},pg:{g:true},
 amt:function(P,i,p){var r=landCalc(i,p.g);return{v:-r.tax*W,t:"양도세 "+man(r.nat)+" + 지방소득세 "+man(r.loc)}},
@@ -901,10 +902,10 @@ var QS=[
  {k:"sp",q:"배우자가 있나요?",t:"ch",o:[["no","없어요"],["zero","있어요 · 소득이 없어요"],["pay","있어요 · 일해서 버는 돈이 있어요"]],when:qWork},
  {k:"spPay",q:"배우자의 작년 총급여는 얼마였나요?",sub:"세전 연봉이에요. 아르바이트도 포함해요.",t:"num",u:"만원",ph:"700",when:function(){return qWork()&&QA.sp=="pay"}},
  {k:"deps",q:"함께 사는 자녀(만 20세 이하)와 부모님(만 60세 이상)은 몇 명인가요?",sub:"소득이 없는 가족만 세어 주세요. 없으면 0이에요.",t:"num",u:"명",ph:"0",when:qWork},
- {k:"rent",q:"월세를 내고 있나요? 1년 치 월세를 알려 주세요.",sub:"안 내면 0이에요. 집이 없는 세대주라고 가정해요.",t:"num",u:"만원",ph:"0",when:qWork},
  {k:"house",q:"집이 있나요?",t:"ch",o:[["0","없어요"],["1","1채 있어요"],["2","2채 이상 있어요"]]},
  {k:"pub",q:"가진 집의 공시가격은 모두 합쳐 얼마인가요?",sub:"부동산 공시가격 알리미에서 확인할 수 있어요. 대략이면 충분해요.",t:"num",u:"만원",ph:"150,000",when:function(){return QA.house!="0"},
-  extra:[{k:"live",l:"그 집에 실제로 산 기간",u:"년",ph:"6"}]},
+  extra:[{k:"live",l:"그 집에 실제로 산 기간 (6월 1일 기준, 주민등록 전입일부터 · 1년 미만 버림, 7년 6개월 → 7년)",u:"년",ph:"6"}]},
+ {k:"rent",q:"월세를 내고 있나요? 1년 치 월세를 알려 주세요.",sub:"안 내면 0이에요. 월세세액공제는 집이 없는 세대만 받을 수 있어서, 집이 없는 세대의 세대주라고 가정해요.",t:"num",u:"만원",ph:"0",when:function(){return qWork()&&QA.house=="0"}},
  {k:"topics",q:"이 중에 해당하는 게 있나요?",sub:"있는 것만 모두 골라 주세요. 없으면 그냥 '다음'을 누르면 돼요.",t:"multi",o:function(){var o=[];
    if(QA.house&&QA.house!="0")o.push(["sellHouse","가진 집을 팔 계획이 있어요 (양도소득세)"]);
    o.push(["buyHouse","집을 살 계획이 있어요 (취득세)"]);
@@ -914,7 +915,7 @@ var QS=[
  /* 집을 팔 때 */
  {k:"hsell",q:"집을 얼마에 팔 것 같나요?",sub:"공시가격이 아니라 실제로 팔 가격이에요.",t:"num",u:"만원",ph:"200,000",when:function(){return qHas("sellHouse")},extra:[{k:"hbuy",l:"그 집을 산 가격 (취득세·중개수수료 등 경비 포함)",u:"만원",ph:"90,000"}]},
  {k:"hy",q:"언제 팔 계획인가요?",sub:"양도세는 파는 해에 따라 단계적으로 바뀌어요.",t:"ch",o:[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]],when:function(){return qHas("sellHouse")}},
- {k:"hhold",q:"팔 때까지 그 집을 몇 년 갖고 있게 되나요?",sub:"그중 실제로 산 기간도 알려 주세요.",t:"num",u:"년",ph:"12",when:function(){return qHas("sellHouse")},extra:[{k:"hlive",l:"팔 때까지 실제로 산 기간",u:"년",ph:"6"}]},
+ {k:"hhold",q:"팔 때까지 그 집을 몇 년 갖고 있게 되나요?",sub:"보유기간은 산 날(잔금일과 등기접수일 중 빠른 날)부터 판 날까지예요. 첫날은 세지 않아서(초일불산입) 2020.3.10에 사서 2027.3.10에 팔면 꼭 7년이에요. 1년이 안 되는 기간은 버리고 적어 주세요 (7년 6개월 → 7년). 그중 실제로 산 기간(주민등록 전입일~전출일)도 같은 방식으로 알려 주세요.",t:"num",u:"년",ph:"12",when:function(){return qHas("sellHouse")},extra:[{k:"hlive",l:"팔 때까지 실제로 산 기간 (1년 미만 버림)",u:"년",ph:"6"}]},
  {k:"hadj",q:"그 집이 조정대상지역에 있나요?",sub:"다주택자는 조정대상지역이면 양도세가 무거워져요(중과).",t:"ch",o:[["n","아니요"],["y","네"]],when:function(){return qHas("sellHouse")&&QA.house=="2"}},
  /* 집을 살 때 */
  {k:"bkind",q:"어떤 집을 살 계획인가요?",t:"ch",o:[["house","아파트·주택"],["oft","주거용 오피스텔"]],when:function(){return qHas("buyHouse")}},
@@ -941,10 +942,10 @@ var QS=[
  {k:"spur",q:"회사는 그 주식을 사서 어떻게 하나요?",t:"ch",o:[["other","갖고 있거나 임직원 보상 등에 써요"],["cancel","이익으로 소각해요 (이익소각)"]],when:function(){return qHas("stock")}},
  {k:"sco",q:"그 회사는 어떤 회사인가요?",t:"ch",o:[["sme","중소기업 · 나는 대주주 아님"],["smebig","중소기업 · 나는 대주주"],["non","중소기업 아님 · 나는 대주주 아님"],["nonbig","중소기업 아님 · 나는 대주주"]],when:function(){return qHas("stock")}},
  /* 비사업용 토지 */
- {k:"lsell",q:"땅을 얼마에 팔 계획인가요?",t:"num",u:"만원",ph:"50,000",when:function(){return qHas("land")},extra:[{k:"lbuy",l:"산 가격 (경비 포함)",u:"만원",ph:"20,000"},{k:"lhold",l:"갖고 있던 기간",u:"년",ph:"8"}]},
+ {k:"lsell",q:"땅을 얼마에 팔 계획인가요?",t:"num",u:"만원",ph:"50,000",when:function(){return qHas("land")},extra:[{k:"lbuy",l:"산 가격 (경비 포함)",u:"만원",ph:"20,000"},{k:"lhold",l:"갖고 있던 기간 (산 날 다음 날부터 판 날까지 · 1년 미만 버림, 7년 6개월 → 7년)",u:"년",ph:"8"}]},
  /* 가업상속 */
  {k:"gbiz",q:"물려줄 회사(가업)의 가치는 얼마인가요?",sub:"회사 주식과 사업용 자산이에요. 그 밖의 상속재산도 알려 주세요.",t:"num",u:"만원",ph:"7,000,000",when:function(){return qHas("inherit")},extra:[{k:"goth",l:"그 밖의 상속재산",u:"만원",ph:"300,000"}]},
- {k:"gyrs",q:"부모님(피상속인)이 그 회사를 몇 년 경영했나요?",sub:"자녀(상속인)가 상속 전에 그 회사에서 일한 기간도 알려 주세요.",t:"num",u:"년",ph:"32",when:function(){return qHas("inherit")},extra:[{k:"gheir",l:"자녀가 회사에서 일한 기간",u:"년",ph:"6"}]},
+ {k:"gyrs",q:"부모님(피상속인)이 그 회사를 몇 년 경영했나요?",sub:"상속이 시작되는 날(사망일) 기준으로 세요. 1년이 안 되는 기간은 버리고 적어 주세요 (7년 6개월 → 7년). 자녀(상속인)가 상속 전에 그 회사에서 일한 기간도 알려 주세요.",t:"num",u:"년",ph:"32",when:function(){return qHas("inherit")},extra:[{k:"gheir",l:"자녀가 상속 전에 회사에서 일한 기간 (1년 미만 버림)",u:"년",ph:"6"}]},
 ];
 function qList(){return QS.filter(function(q){return !q.when||q.when()})}
 function qv(v){return typeof v=="function"?v():v}
@@ -960,16 +961,15 @@ function qTb(){if(!qWork())return{tb:0,nc:0};var g=qWage(),b=qBiz(),sp=QA.sp,spp
 function qRentRate(){var g=qWage(),b=qBiz();if(QA.type=="biz")return b<=4500?.17:b<=7000?.15:0;var si=g-wageDed(g)+b;return(g<=5500&&si<=4500)?.17:(g<=8000&&si<=7000)?.15:0}
 /* 업무용 승용차: 정부안으로 늘거나 줄어드는 비용 (사업소득에서 빠지는 금액, 만원) */
 function qCar(){if(!qHas("car")||!qBizOn()||qNum("cprice")<=0)return 0;var i={price:qNum("cprice"),biz:QA.cbiz===undefined||QA.cbiz===""?100:qNum("cbiz")},k=QA.ckind=="eco"?"eco":"ice";return carDed(i,CAR_G[k]).ok-carDed(i,800).ok}
-function qCalc(){var r=[],tot=0,once=0,T=qTb(),g=qWage()+qBiz(),sp=QA.sp,spp=qNum("spPay"),rent=qNum("rent");
+function qCalc(){var r=[],tot=0,once=0,T=qTb(),g=qWage()+qBiz(),sp=QA.sp,spp=qNum("spPay"),rent=QA.house=="0"?qNum("rent"):0;
  if(qWork()){
  /* 종합소득세: 기본공제 + 업무용 승용차 + 월세 (통합 계산) */
  var newDep=(sp=="pay"&&spp>500&&spp<=750)?1:0,car=qCar(),tbD=Math.max(T.tb-150*newDep,0),tbG=Math.max(tbD-car,0),calcC=prog(T.tb),calcD=prog(tbD),calcG=prog(tbG);
- var noHome=QA.house&&QA.house!="0",rr=noHome?0:qRentRate(),rcC=Math.min(Math.min(rent,1000)*rr,calcC),rcG=Math.min(Math.min(rent,1200)*rr,calcG);
+ var rr=qRentRate(),rcC=Math.min(Math.min(rent,1000)*rr,calcC),rcG=Math.min(Math.min(rent,1200)*rr,calcG);
  var dInc=((calcC-rcC)-(calcG-rcG))*1.1*W;
  if(newDep){var v=(calcC-calcD)*1.1*W;r.push({t:"부양가족 기본공제 소득요건 완화",v:v,y:"2027년부터",w:"배우자 총급여 "+fmt(spp*W)+"이 새 기준(750만원 이하)에 들어와 기본공제 1명분(150만원)이 늘어요. 과세표준 약 "+fmt(T.tb*W)+" 구간의 세율이 "+mr(T.tb)+"%라 소득세와 지방소득세를 합쳐 이만큼 줄어요."})}
  if(car){var vc=(calcD-prog(tbG))*1.1*W;r.push({t:"업무용 승용차 감가상각비 한도 조정",v:vc,y:"2027년부터",w:"1년에 비용으로 인정되는 감가상각비 한도가 800만원에서 "+(QA.ckind=="eco"?"전기·수소차는 1,000만원으로 늘어요. ":"내연기관·하이브리드는 700만원으로 줄어요. ")+"비용이 "+fmt(Math.abs(car)*W)+(car>0?" 더":" 덜")+" 인정돼 사업소득이 그만큼 "+(car>0?"줄어요.":"늘어요.")+" (5년 정액, 업무사용비율 반영)"})}
  if(rent>1000&&rr){var v2=(rcG-rcC)*1.1*W;r.push({t:"월세세액공제 한도 확대",v:v2,y:"2027년부터",w:"공제받는 월세 한도가 1,000만원에서 1,200만원으로 늘어요. 월세 "+fmt(rent*W)+" 중 "+fmt((Math.min(rent,1200)-1000)*W)+"이 더 인정되고, 공제율 "+Math.round(rr*100)+"%가 적용돼요."+(rcG+0.01<Math.min(rent,1200)*rr?" 다만 내야 할 세금보다 많이 공제받을 수는 없어서 이만큼만 줄어요.":"")})}
- else if(rent>0&&noHome)r.push({t:"월세세액공제 한도 확대",v:0,y:"2027년부터",w:"월세세액공제는 무주택 세대만 받을 수 있어서, 집이 있으면 지금도 정부안도 대상이 아니에요."});
  else if(rent>0&&rr)r.push({t:"월세세액공제 한도 확대",v:0,y:"2027년부터",w:"한도가 1,000만원 → 1,200만원으로 늘지만, 월세가 1,000만원 이하라 지금도 다 공제받고 있어서 변화가 없어요."});
  tot+=dInc;
  }
@@ -1014,7 +1014,7 @@ function qCalc(){var r=[],tot=0,once=0,T=qTb(),g=qWage()+qBiz(),sp=QA.sp,spp=qNu
   corp={t:"내 법인의 법인세",v:dk,y:"2027년 사업연도부터",w:(why.length?why.join(". ")+".":"입력하신 내용으로는 법인세에 바뀌는 항목이 없어요. 법인세율(10~25%)은 정부안에서 바뀌지 않아요.")+" 지금 세법 "+fmt(ka.tot*W)+" → 정부안 "+fmt(kg.tot*W)+"(법인지방소득세 포함)."}}
  return{items:r,tot:tot,once:once,tb:T.tb,corp:corp}}
 function qTimeline(){var Y={};function add(y,t){(Y[y]=Y[y]||[]).push(t)}
- if(qWork())add("2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대");if(qHas("car"))add("2027","업무용 승용차 감가상각비 한도 조정");if(qHas("vat")&&qNum("vcard")>0)add("2027","카드 매출 세액공제 축소");if(qHas("corp"))add("2027","법인세 지방 우대·자기주식 처분손익 과세 제외");
+ if(qWork())add("2027","부양가족 기본공제 소득요건 완화"+(QA.house=="0"?", 월세세액공제 확대":""));if(qHas("car"))add("2027","업무용 승용차 감가상각비 한도 조정");if(qHas("vat")&&qNum("vcard")>0)add("2027","카드 매출 세액공제 축소");if(qHas("corp"))add("2027","법인세 지방 우대·자기주식 처분손익 과세 제외");
  if(QA.house&&QA.house!="0"){add("2027","종합부동산세 개편");add("2028",QA.house=="1"?"1주택 양도세가 거주 기간 중심으로 바뀌기 시작 (보유 연 2% + 거주 연 6%), 종부세 세율표 통합":"다주택 양도세 중과가 2027년보다 커짐 (+10%p / +15%p), 종부세 세율표 통합");
   add("2029",QA.house=="1"?"양도세 장기공제가 거주 연 8%만 남아요. 오래 갖고만 있고 살지 않은 집은 공제가 크게 줄어요":"다주택 양도세 중과가 원래대로 (+20%p / +30%p) 돌아가요")}
  if(qHas("vat")&&qNum("vfood")>0)add("2028","음식점 의제매입세액공제 우대(9/109)가 2028년 말까지 이어져요");
@@ -1022,7 +1022,7 @@ function qTimeline(){var Y={};function add(y,t){(Y[y]=Y[y]||[]).push(t)}
 /* 결과 아래 '이렇게 가정했어요': 실제와 다를 수 있는 가정을 숨기지 않고 보여줘요 */
 function qAssume(c){var a=[];
  if(qWork())a.push('과세표준은 근로소득공제·사회보험료·기본공제만 반영해 대략 '+fmt(c.tb*W)+'으로 추정했어요.'+(QA.type=="both"?' 월급(근로소득금액 '+fmt((qWage()-wageDed(qWage()))*W)+')과 사업소득금액 '+fmt(qBiz()*W)+'을 합쳤어요.':''));
- if(qNum("rent")>0)a.push('월세는 집이 없는 세대의 세대주가 내는 것으로 봤어요.');
+ if(QA.house=="0"&&qNum("rent")>0)a.push('월세는 집이 없는 세대의 세대주가 내는 것으로 봤어요.');
  if(QA.house=="2")a.push('집이 2채 이상이면 모두 <b>2주택</b>으로 보고 계산했어요. 3주택 이상은 종부세 세율이 더 높고, 조정대상지역 양도세 중과도 +30%p라 실제 세금은 더 많을 수 있어요.');
  if(QA.house&&QA.house!="0")a.push('종부세는 2027년분만 보여 드려요. 공시가격은 그대로라고 봤어요.');
  if(qHas("sellHouse"))a.push((QA.house=="1"?'1세대 1주택 비과세 요건(2년 보유 등)을 채운다고 봤어요. ':'')+'집을 산 가격에 취득세·중개수수료 같은 경비가 들어 있다고 봤어요.');
@@ -1062,7 +1062,7 @@ function qClear(){document.querySelectorAll('main section:not(#sec-sum) input, m
 function qFill(nav){qClear();var T=qTb(),biz=QA.type=="biz",sec="inc";
  if(qWork()){$("ptype").value=QA.type;$("pinc").value=qNum("inc");$("pbiz").value=QA.type=="both"?qNum("bizInc"):"";$("ptb").value=Math.round(T.tb);$("deps").innerHTML="";
   if(QA.sp!="no")addDep({rel:"spouse",age:"",kind:"pay",amt:QA.sp=="pay"?qNum("spPay"):0});for(var k=0;k<qNum("deps");k++)addDep({rel:"desc",age:10,kind:"inc",amt:0});
-  if(qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
+  if(QA.house=="0"&&qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
   $("f10hh").value="auto";$("f10tot").value=qWage()+(QA.sp=="pay"?qNum("spPay"):0)}
  if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");if(QA.house!="1")$("hother").value=0}
  if(qHas("sellHouse")){qSet("hsell",qNum("hsell"));qSet("hbuy",qNum("hbuy"));qSet("hy",QA.hy||"2029");qSet("hhold",qNum("hhold"));qSet("hlive",qNum("hlive"));qSet("hadj",QA.hadj=="y")}
