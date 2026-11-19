@@ -92,6 +92,7 @@ button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);
 .qk .tl li span{font-size:14px;line-height:1.55;border-left:2px solid var(--line);padding-left:12px}
 .qk h4{font-size:16px;margin:18px 0 6px}
 .qk .qnote{font-size:12.5px;color:var(--sub);margin:12px 0 0}
+.qk ul.qnote{margin:4px 0 0;padding-left:18px;line-height:1.6}
 
 .mr{font-size:13.5px;color:var(--acc);margin:2px 0 0}
 .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--warnline);border-radius:8px;padding:18px 16px;margin:0 0 20px}
@@ -283,8 +284,9 @@ footer p{margin:0 0 6px}
 </div>
 <div role="tabpanel" id="t0" aria-labelledby="b0">
 <div class="grid">
-<div class="fld"><label for="ptype">소득 유형</label><select id="ptype"><option value="wage">근로소득자 (총급여 기준)</option><option value="biz">사업자 (종합소득금액 기준)</option></select></div>
+<div class="fld"><label for="ptype">소득 유형</label><select id="ptype"><option value="wage">근로소득자 (총급여 기준)</option><option value="biz">사업자 (종합소득금액 기준)</option><option value="both">근로소득 + 사업소득 둘 다</option></select></div>
 <div class="fld"><label for="pinc" id="pincl">연 총급여 (만원)</label><input id="pinc" type="number" inputmode="numeric" min="0" placeholder="예: 6000"></div>
+<div class="fld" id="pbizf" hidden><label for="pbiz">연 사업소득금액 (만원)</label><input id="pbiz" type="number" inputmode="numeric" min="0" placeholder="매출 − 경비, 예: 1000"><p class="mr">아래 과세표준에는 근로소득과 사업소득을 합친 금액을 넣어 주세요.</p></div>
 <div class="fld"><label for="ptb">현재 기준 종합소득 과세표준 (만원)</label><input id="ptb" type="number" inputmode="numeric" min="0" placeholder="예: 4500"><p class="mr" id="mr"></p></div>
 </div>
 </div>
@@ -374,7 +376,8 @@ var YRS=[["2027","2027년"],["2028","2028년"],["2029","2029년 이후"]];
 var BR=[[1400,.06,0],[5000,.15,126],[8800,.24,576],[15000,.35,1544],[30000,.38,1994],[50000,.40,2594],[100000,.42,3594],[1e12,.45,6594]];
 function mr(tb){for(var i=0;i<BR.length;i++)if(+tb<=BR[i][0])return BR[i][1]*100}
 function prog(tb){if(tb<=0)return 0;for(var i=0;i<BR.length;i++)if(tb<=BR[i][0])return tb*BR[i][1]-BR[i][2]}
-function rentRate(P){var a=+P.inc;return P.type=="wage"?(a<=5500?.17:a<=8000?.15:0):(a<=4500?.17:a<=7000?.15:0)}
+/* 근로+사업: 근로자 요건(총급여 8천·종합소득금액 7천 이하, 17%는 5,500·4,500 이하)을 함께 봐요 */
+function rentRate(P){var a=+P.inc;if(P.type=="both"){var si=a-wageDed(a)+(+P.biz||0);return(a<=5500&&si<=4500)?.17:(a<=8000&&si<=7000)?.15:0}return P.type=="wage"?(a<=5500?.17:a<=8000?.15:0):(a<=4500?.17:a<=7000?.15:0)}
 function sign(x,lab){lab=lab||["세금을 덜 내요","세금을 더 내요"];var a=fmt(Math.abs(x));return x>0.5?'<span class="amt"><strong class="good">'+a+'</strong><small class="good">'+lab[0]+'</small></span>':x<-0.5?'<span class="amt"><strong class="bad">'+a+'</strong><small class="bad">'+lab[1]+'</small></span>':'<strong class="flat">변화 없음</strong>'}
 function psign(x){return x>0.5?'<strong class="good">+'+fmt(x)+'</strong>':x<-0.5?'<strong class="bad">−'+fmt(-x)+'</strong>':'<strong class="flat">변화 없음</strong>'}
 function go(s,t){return ' <a href="#p-'+s+'" data-sec="'+s+'"'+(t!=null?' data-sub="'+t+'"':'')+'>입력하기</a>'}
@@ -395,7 +398,7 @@ function rentOK(P){var w=[];
  if(!rentRate(P))w.push("소득요건");
  return{ok:!w.length,w:w}}
 var DEP_C={inc:100,pay:500},DEP_G={inc:300,pay:750};
-function incCalc(P,gov){var nc=nDeps(P,DEP_C),n=gov?nDeps(P,DEP_G):nc,ci=readI(11),li=readI(12),biz=P.type=="biz",car=0;
+function incCalc(P,gov){var nc=nDeps(P,DEP_C),n=gov?nDeps(P,DEP_G):nc,ci=readI(11),li=readI(12),biz=P.type!="wage",car=0;
  if(gov&&biz&&ci.price!==""&&ci.biz!=="")car=carDed(ci,CAR_G[ci.kind]).ok-carDed(ci,800).ok;
  var tb=Math.max(+P.tb-150*(n-nc)-car,0),calc=prog(tb),rent=$("f1rent").value;
  var rc=(rent!==""&&rentOK(P).ok)?Math.min(+rent,gov?1200:1000)*rentRate(P):0,lc=biz?leaveCr(li,!gov):0,cr=Math.min(rc+lc,calc);
@@ -495,7 +498,7 @@ function carDed(i,lim){var dep=+i.price/5*(+i.biz/100);return{dep:dep,ok:Math.mi
 var CAR_C={eco:800,ice:800},CAR_G={eco:1000,ice:700};
 function carYears(i,lim){var tot=+i.price*(+i.biz/100),dep=tot/5;return dep<=lim?5:Math.ceil(tot/lim)}
 function leaveCr(i,on){return(on&&i.ok&&i.n!=="")?+i.n*(i.size=="sme"?1300:900):0}
-function bizNeed(P){return P.type!="biz"?"개인사업자에게만 해당돼요. 소득 탭에서 소득 유형을 사업자로 바꿔 주세요."+go("inc",0):P.tb===""?"종합소득 과세표준을 입력해 주세요."+go("inc",0):""}
+function bizNeed(P){return P.type=="wage"?"개인사업자에게만 해당돼요. 소득 탭에서 소득 유형을 사업자 또는 '근로소득 + 사업소득 둘 다'로 바꿔 주세요."+go("inc",0):P.tb===""?"종합소득 과세표준을 입력해 주세요."+go("inc",0):""}
 function deemed(P,pref){var s=$("f3sales").value,b=$("f3buy").value;if(s===""||b==="")return{v:0,l:"-"};var r,l;if(P.b.form=="corp"){r=6/106;l="6/106"}else if(pref&&+s<=40000){r=9/109;l="9/109"}else{r=8/108;l="8/108"}return{v:+b*W*r,l:l}}
 function card(P,gov){var p=$("f4pay").value;if(p===""||!cardOK(P).ok)return 0;return Math.min(+p*W*(gov?.012:.013),(gov?500:1000)*W)}
 
@@ -784,7 +787,7 @@ ml:"양도소득세 + 지방소득세 변화",note:"비사업용 토지에 해�
 ];
 
 function readP(){var d=[];document.querySelectorAll(".dep").forEach(function(r){var q=function(c){return r.querySelector(c)};d.push({rel:q(".d-rel").value,age:q(".d-age").value,kind:q(".d-kind").value,amt:q(".d-amt").value||0,dis:q(".d-dis").checked,live:q(".d-live").checked})});
-return{type:$("ptype").value,inc:$("pinc").value,tb:$("ptb").value,deps:d,
+return{type:$("ptype").value,inc:$("pinc").value,biz:$("pbiz").value,tb:$("ptb").value,deps:d,
 r:{hh:$("rhh").value,house:$("rhouse").checked,move:$("rmove").checked,sin:$("rsin").checked},
 k:{name:$("kpname").value.trim(),size:$("kpsize").value,tb:$("kptb").value,coef:+$("kpreg").value},
 b:{form:$("bform").value,prev:$("bprev").value,net:$("bnet").value,ind:$("bind").checked},
@@ -821,7 +824,7 @@ function integ(P,sec){
  if(sec=="cg"||sec=="inh"){var e=null;(sec=="cg"?[22,24]:[23]).forEach(function(ix){var it=ITEMS[ix],i=readI(ix);if(it.need(P,i))return;e=(e||0)+it.amt(P,i,it.pg).v-it.amt(P,i,it.pc).v});return e==null?{h:""}:{e:e,h:""}}
 }
 function run(){
-$("hotherf").hidden=$("hcnt").value=="1";var P=readP();$("pincl").textContent=P.type=="wage"?"연 총급여 (만원)":"연 종합소득금액 (만원)";
+$("hotherf").hidden=$("hcnt").value=="1";var P=readP();$("pincl").textContent=P.type=="biz"?"연 종합소득금액 (만원)":"연 총급여 (만원)";$("pbizf").hidden=P.type!="both";
 $("mr").textContent=P.tb===""?"":"적용 최고세율 "+mr(P.tb)+"% (소득세 기본세율 기준)";
 var pass=0,chg=0;
 ITEMS.forEach(function(it,ix){
@@ -960,16 +963,14 @@ function qCalc(){var r=[],tot=0,once=0,T=qTb(),g=qWage()+qBiz(),sp=QA.sp,spp=qNu
  if(qWork()){
  /* 종합소득세: 기본공제 + 업무용 승용차 + 월세 (통합 계산) */
  var newDep=(sp=="pay"&&spp>500&&spp<=750)?1:0,car=qCar(),tbD=Math.max(T.tb-150*newDep,0),tbG=Math.max(tbD-car,0),calcC=prog(T.tb),calcD=prog(tbD),calcG=prog(tbG);
- var rr=qRentRate(),rcC=Math.min(Math.min(rent,1000)*rr,calcC),rcG=Math.min(Math.min(rent,1200)*rr,calcG);
+ var noHome=QA.house&&QA.house!="0",rr=noHome?0:qRentRate(),rcC=Math.min(Math.min(rent,1000)*rr,calcC),rcG=Math.min(Math.min(rent,1200)*rr,calcG);
  var dInc=((calcC-rcC)-(calcG-rcG))*1.1*W;
  if(newDep){var v=(calcC-calcD)*1.1*W;r.push({t:"부양가족 기본공제 소득요건 완화",v:v,y:"2027년부터",w:"배우자 총급여 "+fmt(spp*W)+"이 새 기준(750만원 이하)에 들어와 기본공제 1명분(150만원)이 늘어요. 과세표준 약 "+fmt(T.tb*W)+" 구간의 세율이 "+mr(T.tb)+"%라 소득세와 지방소득세를 합쳐 이만큼 줄어요."})}
  if(car){var vc=(calcD-prog(tbG))*1.1*W;r.push({t:"업무용 승용차 감가상각비 한도 조정",v:vc,y:"2027년부터",w:"1년에 비용으로 인정되는 감가상각비 한도가 800만원에서 "+(QA.ckind=="eco"?"전기·수소차는 1,000만원으로 늘어요. ":"내연기관·하이브리드는 700만원으로 줄어요. ")+"비용이 "+fmt(Math.abs(car)*W)+(car>0?" 더":" 덜")+" 인정돼 사업소득이 그만큼 "+(car>0?"줄어요.":"늘어요.")+" (5년 정액, 업무사용비율 반영)"})}
  if(rent>1000&&rr){var v2=(rcG-rcC)*1.1*W;r.push({t:"월세세액공제 한도 확대",v:v2,y:"2027년부터",w:"공제받는 월세 한도가 1,000만원에서 1,200만원으로 늘어요. 월세 "+fmt(rent*W)+" 중 "+fmt((Math.min(rent,1200)-1000)*W)+"이 더 인정되고, 공제율 "+Math.round(rr*100)+"%가 적용돼요."+(rcG+0.01<Math.min(rent,1200)*rr?" 다만 내야 할 세금보다 많이 공제받을 수는 없어서 이만큼만 줄어요.":"")})}
+ else if(rent>0&&noHome)r.push({t:"월세세액공제 한도 확대",v:0,y:"2027년부터",w:"월세세액공제는 무주택 세대만 받을 수 있어서, 집이 있으면 지금도 정부안도 대상이 아니에요."});
  else if(rent>0&&rr)r.push({t:"월세세액공제 한도 확대",v:0,y:"2027년부터",w:"한도가 1,000만원 → 1,200만원으로 늘지만, 월세가 1,000만원 이하라 지금도 다 공제받고 있어서 변화가 없어요."});
  tot+=dInc;
- /* 근로장려금 */
- var hh=(sp=="pay"&&spp>=300)?"two":(sp!="no"||qNum("deps")>0)?"one":"single",ei=g+(hh=="two"?spp:0),ec=eitcRaw(hh,ei,false)[0],eg=eitcRaw(hh,ei,true)[0],de=(eg-ec)*W;
- if(Math.abs(de)>0.5){var hn={single:"단독",one:"홑벌이",two:"맞벌이"}[hh];r.push({t:"근로장려금 확대",v:de,lab:["장려금을 더 받아요","장려금을 덜 받아요"],y:"2027년부터",w:hn+" 가구 기준으로 소득 요건과 최대 지급액이 올라가요. 부부 합산 총소득 "+fmt(ei*W)+"이면 "+(ec>0?fmt(ec*W)+"에서 ":"지금은 대상이 아니지만 ")+fmt(eg*W)+"을 받을 수 있어요. 재산이 1억 7천만원 미만이라고 가정했어요."+(qBizOn()?" 사업소득은 실제로는 매출액에 업종별 비율을 곱해 계산하지만, 여기서는 사업소득금액으로 대신했어요.":"")});tot+=de}
  }
  /* 프리랜서 원천징수 (선납분이라 최종 세금은 같아요) */
  if(qHas("free")&&qNum("free")>0){var fr=qNum("free");r.push({t:"프리랜서 원천징수세율 인하 (3.3% → 2.2%)",v:0,y:"시행령 시행 후 지급분부터",w:"받을 때 미리 떼는 세금이 1년에 "+fmt(fr*.011*W)+" 줄어 손에 쥐는 돈이 늘어요. 다만 5월 종합소득세 신고 때 정산하므로 최종 세금은 같고, 그만큼 환급이 줄거나 추가 납부가 늘어요."})}
@@ -1012,11 +1013,23 @@ function qCalc(){var r=[],tot=0,once=0,T=qTb(),g=qWage()+qBiz(),sp=QA.sp,spp=qNu
   corp={t:"내 법인의 법인세",v:dk,y:"2027년 사업연도부터",w:(why.length?why.join(". ")+".":"입력하신 내용으로는 법인세에 바뀌는 항목이 없어요. 법인세율(10~25%)은 정부안에서 바뀌지 않아요.")+" 지금 세법 "+fmt(ka.tot*W)+" → 정부안 "+fmt(kg.tot*W)+"(법인지방소득세 포함)."}}
  return{items:r,tot:tot,once:once,tb:T.tb,corp:corp}}
 function qTimeline(){var Y={};function add(y,t){(Y[y]=Y[y]||[]).push(t)}
- if(qWork())add("2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대, 근로장려금 확대");if(qHas("car"))add("2027","업무용 승용차 감가상각비 한도 조정");if(qHas("vat")&&qNum("vcard")>0)add("2027","카드 매출 세액공제 축소");if(qHas("corp"))add("2027","법인세 지방 우대·자기주식 처분손익 과세 제외");
+ if(qWork())add("2027","부양가족 기본공제 소득요건 완화, 월세세액공제 확대");if(qHas("car"))add("2027","업무용 승용차 감가상각비 한도 조정");if(qHas("vat")&&qNum("vcard")>0)add("2027","카드 매출 세액공제 축소");if(qHas("corp"))add("2027","법인세 지방 우대·자기주식 처분손익 과세 제외");
  if(QA.house&&QA.house!="0"){add("2027","종합부동산세 개편");add("2028",QA.house=="1"?"1주택 양도세가 거주 기간 중심으로 바뀌기 시작 (보유 연 2% + 거주 연 6%), 종부세 세율표 통합":"다주택 양도세 중과가 2027년보다 커짐 (+10%p / +15%p), 종부세 세율표 통합");
   add("2029",QA.house=="1"?"양도세 장기공제가 거주 연 8%만 남아요. 오래 갖고만 있고 살지 않은 집은 공제가 크게 줄어요":"다주택 양도세 중과가 원래대로 (+20%p / +30%p) 돌아가요")}
  if(qHas("vat")&&qNum("vfood")>0)add("2028","음식점 의제매입세액공제 우대(9/109)가 2028년 말까지 이어져요");
  return Object.keys(Y).sort().map(function(y){return[y,Y[y].join(" · ")+"."]})}
+/* 결과 아래 '이렇게 가정했어요': 실제와 다를 수 있는 가정을 숨기지 않고 보여줘요 */
+function qAssume(c){var a=[];
+ if(qWork())a.push('과세표준은 근로소득공제·사회보험료·기본공제만 반영해 대략 '+fmt(c.tb*W)+'으로 추정했어요.'+(QA.type=="both"?' 월급(근로소득금액 '+fmt((qWage()-wageDed(qWage()))*W)+')과 사업소득금액 '+fmt(qBiz()*W)+'을 합쳤어요.':''));
+ if(qNum("rent")>0)a.push('월세는 집이 없는 세대의 세대주가 내는 것으로 봤어요.');
+ if(QA.house=="2")a.push('집이 2채 이상이면 모두 <b>2주택</b>으로 보고 계산했어요. 3주택 이상은 종부세 세율이 더 높고, 조정대상지역 양도세 중과도 +30%p라 실제 세금은 더 많을 수 있어요.');
+ if(QA.house&&QA.house!="0")a.push('종부세는 2027년분만 보여 드려요. 공시가격은 그대로라고 봤어요.');
+ if(qHas("sellHouse"))a.push((QA.house=="1"?'1세대 1주택 비과세 요건(2년 보유 등)을 채운다고 봤어요. ':'')+'집을 산 가격에 취득세·중개수수료 같은 경비가 들어 있다고 봤어요.');
+ if(qHas("vat"))a.push('카드 매출 세액공제는 소비자를 상대하는 업종(소매·음식·숙박 등)이라고 봤고, 납부세액 한도는 반영하지 않았어요.');
+ if(qHas("corp"))a.push('법인세는 입력한 과세표준과 세액공제만으로 계산했어요(최저한세 포함).');
+ if(qHas("inherit"))a.push('상속세는 일괄공제 5억원과 신고세액공제 3%만 반영했어요.');
+ a.push('근로장려금, 고령자 비수도권 이주 감면, 육아휴직 복귀자 추가공제, 접대비 증빙 기준, 법인 차량은 간단 계산에서 빠져 있어요. \'자세히 보기\'에서 계산할 수 있어요.');
+ return a}
 function qItem(x){var cls=x.v>0.5?"good":x.v<-0.5?"bad":"flat";return '<div class="qitem"><div class="qh"><b>'+x.t+'</b><span class="qv '+cls+'">'+(cls=="flat"?"변화 없음":(x.v>0?"▼ ":"▲ ")+fmt(Math.abs(x.v)))+'</span></div><p>'+x.w+'</p><span class="chip">'+x.y+'</span></div>'}
 function qRender(){var el=$("qk");if(!el)return;var L=qList();
  if(QI<0){el.innerHTML='<h2>간단하게 계산하기</h2><p>질문 몇 개에만 답하면 개정안으로 내 세금이 어떻게 달라지는지 바로 보여 드려요. 월급·사업소득, 집(보유·매매), 부가가치세, 내 법인, 자기주식, 토지, 가업상속까지 해당하는 것만 골라 답하면 돼요.</p><button type="button" class="qgo" data-q="start">시작하기</button>';return}
@@ -1028,7 +1041,8 @@ function qRender(){var el=$("qk");if(!el)return;var L=qList();
    (c.corp?'<h4>내 법인</h4>'+qItem(c.corp):'')+
    (qTimeline().length?'<h4>언제부터 적용되나요</h4><ul class="tl">'+qTimeline().map(function(t){return '<li><b>'+t[0]+'</b><span>'+t[1]+'</span></li>'}).join("")+'</ul>':'')+
    '<button type="button" class="qgo" data-q="detail">이 값으로 자세히 보기</button><button type="button" class="qback" data-q="restart">다시 하기</button>'+
-   '<p class="qnote">▼ 덜 내요 · ▲ 더 내요. 정부안 기준이에요(국회 확정 전).'+(qWork()?' 과세표준은 근로소득공제·사회보험료·기본공제만 반영해 대략 '+fmt(c.tb*W)+'으로 추정했어요.'+(QA.type=="both"?' 월급(근로소득금액 '+fmt((qWage()-wageDed(qWage()))*W)+')과 사업소득금액 '+fmt(qBiz()*W)+'을 합쳐 계산했어요.':''):'')+(multi?' 매년 내는 세금, 한 번 내는 세금(집·땅·주식을 팔거나 살 때, 상속), 법인이 내는 세금은 성격이 달라 따로 합쳤어요.':'')+' 간단 계산에서는 고령자 비수도권 이주 감면, 육아휴직 복귀자 추가공제, 접대비 증빙 기준, 법인 차량은 빠져 있어요. \'자세히 보기\'에서 넣을 수 있어요.</p>';return}
+   '<p class="qnote">▼ 덜 내요 · ▲ 더 내요. 정부안 기준이에요(국회 확정 전).'+(multi?' 매년 내는 세금, 한 번 내는 세금(집·땅·주식을 팔거나 살 때, 상속), 법인이 내는 세금은 성격이 달라 따로 합쳤어요.':'')+'</p>'+
+   '<p class="qnote"><b>이렇게 가정했어요</b></p><ul class="qnote">'+qAssume(c).map(function(t){return '<li>'+t+'</li>'}).join("")+'</ul>';return}
  var q=L[QI],v=QA[q.k],body,opts=qv(q.o);
  if(q.t=="ch")body='<div class="qch">'+opts.map(function(o){return '<button type="button" data-q="ch" data-v="'+o[0]+'" aria-pressed="'+(v==o[0])+'">'+o[1]+'</button>'}).join("")+'</div>';
  else if(q.t=="multi")body='<div class="qch">'+opts.map(function(o){return '<button type="button" data-q="mt" data-v="'+o[0]+'" aria-pressed="'+qHas(o[0])+'">'+o[1]+'</button>'}).join("")+'</div>';
@@ -1042,10 +1056,10 @@ function qNext(){var L=qList(),q=L[QI];if(q&&q.t=="num"){var i=$("qinp");QA[q.k]
 /* 자세히 보기: 간단 계산 값을 세목별 탭 입력칸으로 넘겨요 (없는 칸은 건너뜀) */
 function qSet(id,v){var e=$(id);if(!e)return;if(e.type=="checkbox")e.checked=!!v;else e.value=v}
 function qFill(){var T=qTb(),biz=QA.type=="biz",sec="inc";
- if(qWork()){/* 둘 다: 근로소득자로 넘기고, 과세표준에 사업소득을 합쳐 넘겨요 */$("ptype").value=biz?"biz":"wage";$("pinc").value=qNum("inc");$("ptb").value=Math.round(T.tb);$("deps").innerHTML="";
+ if(qWork()){$("ptype").value=QA.type;$("pinc").value=qNum("inc");$("pbiz").value=QA.type=="both"?qNum("bizInc"):"";$("ptb").value=Math.round(T.tb);$("deps").innerHTML="";
   if(QA.sp!="no")addDep({rel:"spouse",age:"",kind:"pay",amt:QA.sp=="pay"?qNum("spPay"):0});for(var k=0;k<qNum("deps");k++)addDep({rel:"desc",age:10,kind:"inc",amt:0});
   if(qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
-  $("f10hh").value="auto";$("f10tot").value=qWage()+qBiz()+(QA.sp=="pay"?qNum("spPay"):0)}
+  $("f10hh").value="auto";$("f10tot").value=qWage()+(QA.sp=="pay"?qNum("spPay"):0)}
  if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");$("hhold").value=qNum("live");if(QA.house!="1")$("hother").value=0}
  if(qHas("sellHouse")){qSet("hsell",qNum("hsell"));qSet("hbuy",qNum("hbuy"));qSet("hy",QA.hy||"2029");qSet("hhold",qNum("hhold"));qSet("hlive",qNum("hlive"));qSet("hadj",QA.hadj=="y")}
  if(qHas("vat")){qSet("bform","ind");qSet("bprev",qNum("vprev"));qSet("bind",true);if(qNum("vcard"))qSet("f4pay",qNum("vcard"));if(qNum("vfood")){qSet("f3sales",qNum("vprev"));qSet("f3buy",qNum("vfood"))}}
