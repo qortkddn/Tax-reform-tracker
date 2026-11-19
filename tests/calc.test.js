@@ -50,6 +50,7 @@ const CASES=[
  ['간단 계산(토지): 5억 양도·2억 취득·8년 → 지방소득세 249.5만원 증가','(QA={type:"none",house:"0",topics:["land"],lsell:"50000",lbuy:"20000",lhold:"8"},qCalc().once)',-2495000,1],
  ['상세 탭(근로+사업): 총급여 5,000만 + 사업소득 1,000만 → 월세 공제율 15% (종합소득금액 4,775만)','rentRate({type:"both",inc:"5000",biz:"1000"})*100',15,0.0001],
  ['간단 계산: 근로장려금 항목이 나오지 않아요','(QA={type:"wage",inc:"2000",sp:"no",deps:"0",rent:"0",house:"0"},qCalc().items.filter(function(x){return x.t.indexOf("근로장려금")>=0}).length)',0,0],
+ ['간단 → 세목별 탭 자동 입력: 답한 값(법인 과세표준)은 채우고, 답하지 않은 칸(집 취득가)은 비워요','(document.getElementById("demo").click(),QA={type:"none",house:"0",topics:["corp"],ktb:"96400",ksize:"big",kreg:"1",krd:"0",kinv:"0",ktr:"3000"},qFill(false),($("kptb").value=="96400"&&$("hbuy").value==""&&$("pinc").value=="")?1:0)',1,0],
  ['상속세 산출세액: 과세표준 125억원','itax(1250000)',579000,0.01],
  ['가업상속공제 현행: 경영 32년(한도 600억), 가업 700억·기타 30억','gaCalc({biz:"7000000",oth:"300000",yrs:"32",heir:"6"},false).tax',561630,0.01],
  ['가업상속공제 정부안: 32년×20억=640억 한도','gaCalc({biz:"7000000",oth:"300000",yrs:"32",heir:"6"},true).tax',367630,0.01],

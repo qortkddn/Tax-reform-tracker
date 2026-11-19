@@ -888,7 +888,7 @@ $("ceapply").onclick=function(){$("hexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
 var h=(location.hash||"").slice(1).replace(/^t-/,"");showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
 /* ── 간단하게 계산하기: 질문 몇 개로 내 세금 변화를 먼저 보여주고, '자세히 보기'로 세목별 탭에 값을 넘겨요 ── */
-var QA={},QI=0;
+var QA={},QI=0,qSynced=false;
 /* 해당하는 상황(주제)을 고르면 그 주제의 질문만 이어서 나와요 */
 function qHas(t){return(QA.topics||[]).indexOf(t)>=0}
 function qWork(){return QA.type&&QA.type!="none"}
@@ -1033,14 +1033,14 @@ function qAssume(c){var a=[];
 function qItem(x){var cls=x.v>0.5?"good":x.v<-0.5?"bad":"flat";return '<div class="qitem"><div class="qh"><b>'+x.t+'</b><span class="qv '+cls+'">'+(cls=="flat"?"변화 없음":(x.v>0?"▼ ":"▲ ")+fmt(Math.abs(x.v)))+'</span></div><p>'+x.w+'</p><span class="chip">'+x.y+'</span></div>'}
 function qRender(){var el=$("qk");if(!el)return;var L=qList();
  if(QI<0){el.innerHTML='<h2>간단하게 계산하기</h2><p>질문 몇 개에만 답하면 개정안으로 내 세금이 어떻게 달라지는지 바로 보여 드려요. 월급·사업소득, 집(보유·매매), 부가가치세, 내 법인, 자기주식, 토지, 가업상속까지 해당하는 것만 골라 답하면 돼요.</p><button type="button" class="qgo" data-q="start">시작하기</button>';return}
- if(QI>=L.length){var c=qCalc(),it=c.items;
+ if(QI>=L.length){var c=qCalc(),it=c.items;if(!qSynced){qSynced=true;qFill(false)}
   var yr=it.filter(function(x){return !x.g}),on=it.filter(function(x){return x.g}),hl=function(lab,v){return '<p class="qtot">'+lab+' '+(Math.abs(v)<0.5?'<strong class="flat">변화 없음</strong>':sign(v))+'</p>'},multi=(yr.length?1:0)+(on.length?1:0)+(c.corp?1:0)>1;
   el.innerHTML='<h2>무엇이 바뀌나요</h2>'+(yr.length||!it.length&&!c.corp?hl(multi?'매년 내 세금은':'모두 합치면',c.tot):'')+(on.length?hl(multi||on.length>1?'팔거나 살 때·상속 때 (한 번)':'모두 합치면',c.once):'')+(c.corp?hl('내 법인은 (매년)',c.corp.v):'')+
    (yr.length?(multi?'<h4>매년 내는 세금</h4>':'')+yr.map(qItem).join(""):'')+(!it.length&&!c.corp?'<p class="qsub">입력하신 내용으로는 2027년에 바뀌는 세금이 없어요.</p>':'')+
    (on.length?'<h4>팔거나 살 때·상속 때 (한 번)</h4>'+on.map(qItem).join(""):'')+
    (c.corp?'<h4>내 법인</h4>'+qItem(c.corp):'')+
    (qTimeline().length?'<h4>언제부터 적용되나요</h4><ul class="tl">'+qTimeline().map(function(t){return '<li><b>'+t[0]+'</b><span>'+t[1]+'</span></li>'}).join("")+'</ul>':'')+
-   '<button type="button" class="qgo" data-q="detail">이 값으로 자세히 보기</button><button type="button" class="qback" data-q="restart">다시 하기</button>'+
+   '<p class="qsub qsync">답한 값이 아래 \'개정안으로 내 세금은 이렇게 달라져요\'와 세목별 탭 입력칸에 바로 들어갔어요. 답하지 않은 칸은 비어 있어요. 세목별 탭에서 빈칸을 채우면 아래 표에 바로 반영돼요.</p><button type="button" class="qgo" data-q="detail">세목별로 자세히 입력하기</button><button type="button" class="qback" data-q="restart">다시 하기</button>'+
    '<p class="qnote">▼ 덜 내요 · ▲ 더 내요. 정부안 기준이에요(국회 확정 전).'+(multi?' 매년 내는 세금, 한 번 내는 세금(집·땅·주식을 팔거나 살 때, 상속), 법인이 내는 세금은 성격이 달라 따로 합쳤어요.':'')+'</p>'+
    '<p class="qnote"><b>이렇게 가정했어요</b></p><ul class="qnote">'+qAssume(c).map(function(t){return '<li>'+t+'</li>'}).join("")+'</ul>';return}
  var q=L[QI],v=QA[q.k],body,opts=qv(q.o);
@@ -1053,14 +1053,17 @@ function qRender(){var el=$("qk");if(!el)return;var L=qList();
 function qComma(e){var t=e.target;if(!t.matches||!t.matches("#qinp,.qex"))return;var n=t.value.replace(/[^0-9]/g,"");t.value=n?(+n).toLocaleString("ko-KR"):""}
 function qNext(){var L=qList(),q=L[QI];if(q&&q.t=="num"){var i=$("qinp");QA[q.k]=i.value===""?(q.ph.replace(/,/g,"")=="0"?"0":""):i.value.replace(/,/g,"");if(QA[q.k]===""){i.focus();return}document.querySelectorAll("#qk .qex").forEach(function(x){QA[x.dataset.k]=x.value.replace(/,/g,"")||(x.placeholder=="0"?"0":"")})}
  if(q&&q.t=="multi"&&!QA.topics)QA.topics=[];QI++;qRender()}
-/* 자세히 보기: 간단 계산 값을 세목별 탭 입력칸으로 넘겨요 (없는 칸은 건너뜀) */
+/* 간단 계산 값을 세목별 탭 입력칸에 바로 넣어요. 먼저 모든 칸을 비우고(처음 상태로) 답한 값만 채워서, 답하지 않은 칸은 공란으로 남아요 */
 function qSet(id,v){var e=$(id);if(!e)return;if(e.type=="checkbox")e.checked=!!v;else e.value=v}
-function qFill(){var T=qTb(),biz=QA.type=="biz",sec="inc";
+function qClear(){document.querySelectorAll('main section:not(#sec-sum) input, main section:not(#sec-sum) select').forEach(function(e){
+  if(e.type=="checkbox"||e.type=="radio")e.checked=e.defaultChecked;else if(e.tagName=="SELECT"){var k=0;for(var j=0;j<e.options.length;j++)if(e.options[j].defaultSelected){k=j;break}e.selectedIndex=k}else e.value=e.defaultValue||""});
+ $("deps").innerHTML=""}
+function qFill(nav){qClear();var T=qTb(),biz=QA.type=="biz",sec="inc";
  if(qWork()){$("ptype").value=QA.type;$("pinc").value=qNum("inc");$("pbiz").value=QA.type=="both"?qNum("bizInc"):"";$("ptb").value=Math.round(T.tb);$("deps").innerHTML="";
   if(QA.sp!="no")addDep({rel:"spouse",age:"",kind:"pay",amt:QA.sp=="pay"?qNum("spPay"):0});for(var k=0;k<qNum("deps");k++)addDep({rel:"desc",age:10,kind:"inc",amt:0});
   if(qNum("rent")>0){$("f1rent").value=qNum("rent");$("rhh").value="head";$("rhouse").checked=true;$("rmove").checked=true}
   $("f10hh").value="auto";$("f10tot").value=qWage()+(QA.sp=="pay"?qNum("spPay"):0)}
- if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");$("hhold").value=qNum("live");if(QA.house!="1")$("hother").value=0}
+ if(QA.house&&QA.house!="0"){$("hpub").value=qNum("pub");$("hcnt").value=QA.house=="1"?"1":"2";$("hres").checked=qNum("live")>0;$("hlive").value=qNum("live");if(QA.house!="1")$("hother").value=0}
  if(qHas("sellHouse")){qSet("hsell",qNum("hsell"));qSet("hbuy",qNum("hbuy"));qSet("hy",QA.hy||"2029");qSet("hhold",qNum("hhold"));qSet("hlive",qNum("hlive"));qSet("hadj",QA.hadj=="y")}
  if(qHas("vat")){qSet("bform","ind");qSet("bprev",qNum("vprev"));qSet("bind",true);if(qNum("vcard"))qSet("f4pay",qNum("vcard"));if(qNum("vfood")){qSet("f3sales",qNum("vprev"));qSet("f3buy",qNum("vfood"))}}
  if(qHas("car")){qSet("f11kind",QA.ckind=="eco"?"eco":"ice");qSet("f11price",qNum("cprice"));qSet("f11biz",QA.cbiz?qNum("cbiz"):100)}
@@ -1071,10 +1074,10 @@ function qFill(){var T=qTb(),biz=QA.type=="biz",sec="inc";
  if(qHas("land")){qSet("f24sell",qNum("lsell"));qSet("f24buy",qNum("lbuy"));qSet("f24hold",qNum("lhold"))}
  if(qHas("inherit")){qSet("f23biz",qNum("gbiz"));qSet("f23oth",qNum("goth"));qSet("f23yrs",qNum("gyrs"));qSet("f23heir",qNum("gheir"))}
  if(!qWork())sec=qHas("corp")?"corp":(QA.house&&QA.house!="0")||qHas("buyHouse")?"home":qHas("land")||qHas("stock")?"cg":qHas("inherit")?"inh":"home";
- run();showSec(sec);$("p-"+sec).scrollIntoView({behavior:"smooth"})}
+ run();if(!nav)return;showSec(sec);$("p-"+sec).scrollIntoView({behavior:"smooth"})}
 document.addEventListener("input",qComma);
-document.addEventListener("click",function(e){var b=e.target.closest("#qk [data-q]");if(!b)return;var a=b.dataset.q,L=qList();
- if(a=="start"){QI=0;QA={}}else if(a=="ch"){QA[L[QI].k]=b.dataset.v;QI++}else if(a=="mt"){var t=QA.topics=QA.topics||[],x=t.indexOf(b.dataset.v);if(x<0)t.push(b.dataset.v);else t.splice(x,1)}else if(a=="next"){qNext();return}else if(a=="prev"){QI=QI>0?QI-1:-1}else if(a=="restart"){QI=-1;QA={}}else if(a=="detail"){qFill();return}
+document.addEventListener("click",function(e){var b=e.target.closest("#qk [data-q]");if(!b)return;var a=b.dataset.q,L=qList();if(a!="detail")qSynced=false;
+ if(a=="start"){QI=0;QA={}}else if(a=="ch"){QA[L[QI].k]=b.dataset.v;QI++}else if(a=="mt"){var t=QA.topics=QA.topics||[],x=t.indexOf(b.dataset.v);if(x<0)t.push(b.dataset.v);else t.splice(x,1)}else if(a=="next"){qNext();return}else if(a=="prev"){QI=QI>0?QI-1:-1}else if(a=="restart"){QI=-1;QA={}}else if(a=="detail"){qFill(true);return}
  qRender();var tt=$("qk");if(a!="mt"&&tt&&tt.getBoundingClientRect().top<0)tt.scrollIntoView({behavior:"smooth"})});
 QI=-1;qRender();
 
