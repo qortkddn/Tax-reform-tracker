@@ -886,7 +886,8 @@ function cesum(){var t=["ce1","ce2","ce3","ce4"].reduce(function(a,id){return a+
 document.addEventListener("input",function(e){if(e.target.classList.contains("cin"))cesum()});
 $("ceapply").onclick=function(){$("hexp").value=Math.round(cesum());run()};
 $("gapply").onclick=function(){$("f10asset").value=Math.round(gsum());run()};
-var h=(location.hash||"").slice(1).replace(/^t-/,"");showSec(SECS.some(function(x){return x[0]==h})?h:"sum");
+/* 새로고침하면 마지막으로 보던 탭이 아니라 항상 첫 화면(한눈에 보기)부터 보여줘요 */
+showSec("sum");
 /* ── 간단하게 계산하기: 질문 몇 개로 내 세금 변화를 먼저 보여주고, '자세히 보기'로 세목별 탭에 값을 넘겨요 ── */
 var QA={},QI=0,qSynced=false;
 /* 해당하는 상황(주제)을 고르면 그 주제의 질문만 이어서 나와요 */
