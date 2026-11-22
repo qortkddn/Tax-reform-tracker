@@ -227,7 +227,7 @@ footer p{margin:0 0 6px}
 <section id="sec-home" hidden>
 <div class="panel" id="p-home">
 <h2>내 집 정보</h2>
-<p>집 한 채를 사고, 갖고 있다가, 파는 동안 내는 세금(취득세 → 재산세·종부세 → 양도세)을 한 번에 계산해요. 세대가 가진 주택 수에 따라 세금이 크게 달라져요. 입력값은 저장되지 않아요.</p>
+<p>집 한 채를 사고, 갖고 있다가, 파는 동안 내는 세금(취득세 → 재산세·종부세 → 양도세)을 한 번에 계산해요. 세대가 가진 주택 수에 따라 세금이 크게 달라져요.</p>
 <div class="grid">
 <div class="fld"><label for="hcnt">세대가 가진 주택 수 (이 집 포함)</label><select id="hcnt"><option value="1">1채 (1세대 1주택)</option><option value="2">2채</option><option value="3">3채 이상</option></select></div>
 <div class="fld" id="hotherf" hidden><label for="hother">다른 주택 공시가격 합계 (만원)</label><input id="hother" type="number" inputmode="numeric" min="0" placeholder="종부세 계산용, 예: 50000"></div>
@@ -277,7 +277,7 @@ footer p{margin:0 0 6px}
 <section id="sec-inc" hidden>
 <div class="panel" id="p-inc">
 <h2>내 정보 입력</h2>
-<p>탭별로 입력한 값이 종합소득세 항목의 요건 판정과 계산에 쓰여요. 입력값은 저장되지 않아요.</p>
+<p>탭별로 입력한 값이 종합소득세 항목의 요건 판정과 계산에 쓰여요.</p>
 <div class="tabs" role="tablist">
 <button type="button" role="tab" aria-selected="true" aria-controls="t0" id="b0">소득</button>
 <button type="button" role="tab" aria-selected="false" aria-controls="t1" id="b1">부양가족</button>
@@ -313,7 +313,7 @@ footer p{margin:0 0 6px}
 <section id="sec-corp" hidden>
 <div class="panel" id="p-corp">
 <h2>회사 정보</h2>
-<p>입력한 회사가 내는 법인세가 개정으로 얼마나 달라지는지 계산해요. 조세특례제한법(조특법)의 공제·감면도 결국 법인세를 줄이는 것이라 이 탭에서 함께 계산해요. 입력값은 저장되지 않아요.</p>
+<p>입력한 회사가 내는 법인세가 개정으로 얼마나 달라지는지 계산해요. 조세특례제한법(조특법)의 공제·감면도 결국 법인세를 줄이는 것이라 이 탭에서 함께 계산해요.</p>
 <div class="grid">
 <div class="fld"><label for="kpname">회사명</label><input id="kpname" type="text" placeholder="예: 백상우상사(주)" autocomplete="organization"></div>
 <div class="fld"><label for="kpsize">기업 규모</label><select id="kpsize"><option value="sme">중소기업</option><option value="big">중견·일반기업</option></select></div>
@@ -1033,7 +1033,7 @@ function qAssume(c){var a=[];
  return a}
 function qItem(x){var cls=x.v>0.5?"good":x.v<-0.5?"bad":"flat";return '<div class="qitem"><div class="qh"><b>'+x.t+'</b><span class="qv '+cls+'">'+(cls=="flat"?"변화 없음":(x.v>0?"▼ ":"▲ ")+fmt(Math.abs(x.v)))+'</span></div><p>'+x.w+'</p><span class="chip">'+x.y+'</span></div>'}
 function qRender(){var el=$("qk");if(!el)return;var L=qList();
- if(QI<0){el.innerHTML='<h2>간단하게 계산하기</h2><p>질문 몇 개에만 답하면 개정안으로 내 세금이 어떻게 달라지는지 바로 보여 드려요. 월급·사업소득, 집(보유·매매), 부가가치세, 내 법인, 자기주식, 토지, 가업상속까지 해당하는 것만 골라 답하면 돼요.</p><button type="button" class="qgo" data-q="start">시작하기</button>';return}
+ if(QI<0){el.innerHTML='<h2>간단하게 계산하기</h2><p>질문 몇 개에만 답하면 개정안으로 내 세금이 어떻게 달라지는지 바로 보여 드려요.</p><button type="button" class="qgo" data-q="start">시작하기</button>';return}
  if(QI>=L.length){var c=qCalc(),it=c.items;if(!qSynced){qSynced=true;qFill(false)}
   var yr=it.filter(function(x){return !x.g}),on=it.filter(function(x){return x.g}),hl=function(lab,v){return '<p class="qtot">'+lab+' '+(Math.abs(v)<0.5?'<strong class="flat">변화 없음</strong>':sign(v))+'</p>'},multi=(yr.length?1:0)+(on.length?1:0)+(c.corp?1:0)>1;
   el.innerHTML='<h2>무엇이 바뀌나요</h2>'+(yr.length||!it.length&&!c.corp?hl(multi?'매년 내 세금은':'모두 합치면',c.tot):'')+(on.length?hl(multi||on.length>1?'팔거나 살 때·상속 때 (한 번)':'모두 합치면',c.once):'')+(c.corp?hl('내 법인은 (매년)',c.corp.v):'')+
